@@ -1,30 +1,96 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
-
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #0f766e;
+  --ifm-color-primary-dark: #0c675f;
+  --ifm-color-primary-darker: #0b6159;
+  --ifm-color-primary-darkest: #094f49;
+  --ifm-color-primary-light: #12857d;
+  --ifm-color-primary-lighter: #139087;
+  --ifm-color-primary-lightest: #16a394;
+  --ifm-background-color: #ffffff;
+  --ifm-font-color-base: #0f172a;
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.92);
+  --ifm-footer-background-color: #f8fafc;
+  --docusaurus-highlighted-code-line-bg: rgba(15, 118, 110, 0.08);
+  --wg-border: rgba(15, 23, 42, 0.08);
+  --wg-text-muted: #475569;
+  --wg-surface: #ffffff;
+  --wg-surface-subtle: #f8fafc;
+  --wg-footer-text: #334155;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #34d399;
+  --ifm-color-primary-dark: #22c583;
+  --ifm-color-primary-darker: #1db97b;
+  --ifm-color-primary-darkest: #189862;
+  --ifm-color-primary-light: #49d9a4;
+  --ifm-color-primary-lighter: #57ddb0;
+  --ifm-color-primary-lightest: #7ae6c2;
+  --ifm-background-color: #020617;
+  --ifm-font-color-base: #e2e8f0;
+  --ifm-navbar-background-color: rgba(2, 6, 23, 0.88);
+  --ifm-footer-background-color: #07101b;
+  --docusaurus-highlighted-code-line-bg: rgba(52, 211, 153, 0.14);
+  --wg-border: rgba(148, 163, 184, 0.2);
+  --wg-text-muted: #94a3b8;
+  --wg-surface: #0f172a;
+  --wg-surface-subtle: #07101b;
+  --wg-footer-text: #94a3b8;
+}
+
+.navbar {
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--wg-border);
+}
+
+.navbar__title,
+.navbar__link {
+  color: #0f172a;
+}
+
+.navbar__link:hover,
+.navbar__title:hover {
+  color: #020617;
+}
+
+.footer {
+  background: var(--ifm-footer-background-color);
+  border-top: 1px solid var(--wg-border);
+  color: var(--wg-footer-text);
+}
+
+.footer--dark {
+  background: var(--ifm-footer-background-color);
+}
+
+.footer__copyright {
+  color: var(--wg-footer-text);
+  opacity: 1;
+}
+
+[data-theme='dark'] .navbar__title,
+[data-theme='dark'] .navbar__link {
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .navbar__link:hover,
+[data-theme='dark'] .navbar__title:hover {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .footer--dark {
+  background: var(--ifm-footer-background-color);
+}
+
+:root .footer--dark {
+  background: #f8fafc;
+}
+
+:root .footer--dark .footer__copyright {
+  color: #334155;
+}
+
+[data-theme='dark'] .footer--dark .footer__copyright {
+  color: var(--wg-footer-text);
 }

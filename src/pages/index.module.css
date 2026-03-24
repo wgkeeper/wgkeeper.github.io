@@ -1,23 +1,181 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
   position: relative;
   overflow: hidden;
+  padding: 3.5rem 0 3rem;
+  background:
+    linear-gradient(180deg, var(--wg-surface) 0%, var(--wg-surface-subtle) 100%);
+  color: #0f172a;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroBanner::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: var(--wg-border);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.heroCopy {
+  max-width: 38rem;
+}
+
+.heroTitle {
+  margin-bottom: 0.9rem;
+  max-width: 12ch;
+  font-size: clamp(2.2rem, 4.8vw, 3.35rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.heroText {
+  max-width: 31rem;
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.heroNote {
+  max-width: 31rem;
+  margin: 0 0 1.35rem;
+  color: #475569;
+  font-size: 0.98rem;
 }
 
 .buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  border: 1px solid rgba(15, 118, 110, 0.12);
+  background: #0f766e;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.primaryButton:hover {
+  color: #ffffff;
+  background: #0c675f;
+}
+
+.heroPanel {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.panelCard {
+  width: 100%;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: none;
+}
+
+.panelLabel {
+  margin: 0 0 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #0f766e;
+}
+
+.panelTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.panelList {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #334155;
+  font-size: 0.98rem;
+}
+
+.panelList li + li {
+  margin-top: 0.4rem;
+}
+
+.panelMuted {
+  margin: 0.8rem 0 0;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+[data-theme='dark'] .heroBanner {
+  background:
+    linear-gradient(180deg, var(--wg-surface-subtle) 0%, #020617 100%);
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .heroBanner::after {
+  background: var(--wg-border);
+}
+
+[data-theme='dark'] .eyebrow {
+  color: #5eead4;
+}
+
+[data-theme='dark'] .heroText {
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .heroNote {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .panelCard {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(15, 23, 42, 0.88);
+  box-shadow: none;
+}
+
+[data-theme='dark'] .panelLabel {
+  color: #5eead4;
+}
+
+[data-theme='dark'] .panelTitle {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .panelList {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .panelMuted {
+  color: #94a3b8;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 3rem 0 2.25rem;
+  }
+
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .heroPanel {
+    justify-content: flex-start;
+  }
 }
