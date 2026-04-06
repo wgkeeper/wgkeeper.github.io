@@ -8,6 +8,8 @@ slug: /
 
 WGKeeper is an open-source system for centralized WireGuard® server management.
 
+![WGKeeper Console showing nodes, status, versions, and updates](/img/screenshots/wgkeeper-nodes-light.png)
+
 It has two parts:
 
 - **Console** is the central control plane

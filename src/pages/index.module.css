@@ -1,7 +1,7 @@
 .heroBanner {
   position: relative;
   overflow: hidden;
-  padding: 3.5rem 0 3rem;
+  padding: 3.5rem 0 3.25rem;
   background:
     linear-gradient(180deg, var(--wg-surface) 0%, var(--wg-surface-subtle) 100%);
   color: #0f172a;
@@ -17,9 +17,9 @@
 
 .heroGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
   gap: 2rem;
-  align-items: start;
+  align-items: center;
 }
 
 .eyebrow {
@@ -38,9 +38,8 @@
 .heroTitle {
   margin-bottom: 0.9rem;
   max-width: 12ch;
-  font-size: clamp(2.2rem, 4.8vw, 3.35rem);
+  font-size: 3.25rem;
   line-height: 1.02;
-  letter-spacing: -0.04em;
 }
 
 .heroText {
@@ -75,50 +74,92 @@
   background: #0c675f;
 }
 
-.heroPanel {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.panelCard {
-  width: 100%;
-  padding: 1rem 1.05rem;
+.heroScreenshot,
+.featureCard,
+.detailScreenshot,
+.darkScreenshot {
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: none;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
 }
 
-.panelLabel {
-  margin: 0 0 0.5rem;
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #0f766e;
+.heroScreenshot,
+.detailScreenshot,
+.darkScreenshot {
+  box-shadow: 0 20px 56px rgba(15, 23, 42, 0.11);
 }
 
-.panelTitle {
+.screenshotLink {
+  display: block;
+  color: inherit;
+  cursor: zoom-in;
+}
+
+.screenshotLink img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.screenshotLink:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: -2px;
+}
+
+.section,
+.detailSection {
+  padding: 3rem 0;
+}
+
+.sectionHeader {
+  margin-bottom: 1.3rem;
+}
+
+.sectionTitle {
   margin-bottom: 0.75rem;
-  font-size: 1.1rem;
   color: #0f172a;
+  font-size: 2rem;
+  line-height: 1.12;
 }
 
-.panelList {
+.sectionText {
+  max-width: 32rem;
   margin: 0;
-  padding-left: 1.1rem;
-  color: #334155;
-  font-size: 0.98rem;
+  color: #475569;
+  font-size: 1rem;
 }
 
-.panelList li + li {
-  margin-top: 0.4rem;
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.panelMuted {
-  margin: 0.8rem 0 0;
-  color: #64748b;
-  font-size: 0.88rem;
+.featureCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.featureTitle {
+  margin: 0;
+  padding: 0.95rem 1rem 1rem;
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.detailSection {
+  background: var(--wg-surface-subtle);
+  border-top: 1px solid var(--wg-border);
+  border-bottom: 1px solid var(--wg-border);
+}
+
+.detailGrid,
+.darkModeGrid {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.6fr) minmax(0, 1.4fr);
+  gap: 2rem;
+  align-items: center;
 }
 
 [data-theme='dark'] .heroBanner {
@@ -143,26 +184,28 @@
   color: #94a3b8;
 }
 
-[data-theme='dark'] .panelCard {
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: rgba(15, 23, 42, 0.88);
-  box-shadow: none;
-}
-
-[data-theme='dark'] .panelLabel {
-  color: #5eead4;
-}
-
-[data-theme='dark'] .panelTitle {
+[data-theme='dark'] .sectionTitle {
   color: #f8fafc;
 }
 
-[data-theme='dark'] .panelList {
-  color: #cbd5e1;
+[data-theme='dark'] .sectionText {
+  color: #94a3b8;
 }
 
-[data-theme='dark'] .panelMuted {
-  color: #94a3b8;
+[data-theme='dark'] .heroScreenshot,
+[data-theme='dark'] .featureCard,
+[data-theme='dark'] .detailScreenshot,
+[data-theme='dark'] .darkScreenshot {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: #0f172a;
+}
+
+[data-theme='dark'] .featureTitle {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .detailSection {
+  background: #07101b;
 }
 
 @media screen and (max-width: 996px) {
@@ -175,7 +218,28 @@
     gap: 1.25rem;
   }
 
-  .heroPanel {
-    justify-content: flex-start;
+  .heroTitle {
+    font-size: 2.6rem;
+  }
+
+  .featureGrid,
+  .detailGrid,
+  .darkModeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .heroTitle {
+    font-size: 2.2rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.65rem;
+  }
+
+  .section,
+  .detailSection {
+    padding: 2.25rem 0;
   }
 }
