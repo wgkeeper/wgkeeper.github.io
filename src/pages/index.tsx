@@ -41,9 +41,9 @@ function HomepageHeader() {
             <ul className={styles.panelList}>
               <li>Centralized orchestration</li>
               <li>Many servers and many nodes</li>
-              <li>Node docs available now</li>
+              <li>Console and Node docs available now</li>
             </ul>
-            <p className={styles.panelMuted}>Console documentation will be added later.</p>
+            <p className={styles.panelMuted}>Start with Docker Compose or the recommended Caddy setup.</p>
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Console',
-      items: ['console/index'],
+      items: ['console/installation'],
     },
     {
       type: 'category',

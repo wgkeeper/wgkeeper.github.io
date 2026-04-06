@@ -13,11 +13,9 @@ It has two parts:
 - **Console** is the central control plane
 - **Node** runs on servers and applies configuration locally
 
-WGKeeper Node runs the local WireGuard® interface and exposes a REST API for peer management.
+WGKeeper Console provides the web admin interface, while WGKeeper Node runs the local WireGuard® interface and exposes a REST API for peer management.
 
-This documentation currently focuses on **WGKeeper Node**.
-
-WGKeeper Console is still in progress, so the current public documentation focuses on the Node component.
+This documentation covers both the Console and Node components.
 
 ## What you can find here
 
@@ -36,4 +34,5 @@ WGKeeper Console is still in progress, so the current public documentation focus
 
 - Project: [wgkeeper/wgkeeper](https://github.com/wgkeeper/wgkeeper)
 - Documentation: [wgkeeper/wgkeeper.github.io](https://github.com/wgkeeper/wgkeeper.github.io)
+- Console: [wgkeeper/wgkeeper-console](https://github.com/wgkeeper/wgkeeper-console)
 - Node: [wgkeeper/wgkeeper-node](https://github.com/wgkeeper/wgkeeper-node)
