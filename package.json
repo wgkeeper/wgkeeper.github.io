@@ -1,5 +1,5 @@
 {
-  "name": "my-website",
+  "name": "wgkeeper",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -42,6 +42,6 @@
     ]
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=24.0"
   }
 }
