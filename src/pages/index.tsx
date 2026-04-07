@@ -5,6 +5,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 
+import ScreenshotZoom from '../components/ScreenshotZoom';
 import styles from './index.module.css';
 
 const screenshotPath = '/img/screenshots/';
@@ -12,34 +13,20 @@ const screenshotPath = '/img/screenshots/';
 const features = [
   {
     title: 'Node health and capacity',
-    image: `${screenshotPath}wgkeeper-node-overview-light.png`,
-    alt: 'WGKeeper node overview with health and capacity metrics',
+    description: 'Track node status, version, peer capacity, and health from one Console view.',
+    to: '/docs/console/using-the-console',
   },
   {
     title: 'Peer management',
-    image: `${screenshotPath}wgkeeper-node-peers-light.png`,
-    alt: 'WGKeeper peer management screen',
+    description: 'Create peers, inspect connection state, and verify handshakes after clients connect.',
+    to: '/docs/console/managing-peers-and-configs',
   },
   {
     title: 'Config generation',
-    image: `${screenshotPath}wgkeeper-config-generator-light.png`,
-    alt: 'WGKeeper WireGuard config generator',
+    description: 'Generate WireGuard client configs after assigning peers to the right node.',
+    to: '/docs/console/managing-peers-and-configs#generate-client-config',
   },
 ];
-
-function ScreenshotLink({
-  src,
-  alt,
-}: {
-  src: string;
-  alt: string;
-}) {
-  return (
-    <a className={styles.screenshotLink} href={src} target="_blank" rel="noreferrer">
-      <img src={src} alt={alt} />
-    </a>
-  );
-}
 
 function HomepageHeader() {
   return (
@@ -65,7 +52,7 @@ function HomepageHeader() {
           </div>
         </div>
         <div className={styles.heroScreenshot}>
-          <ScreenshotLink
+          <ScreenshotZoom
             src={`${screenshotPath}wgkeeper-nodes-light.png`}
             alt="WGKeeper Console showing nodes, status, versions, and updates"
           />
@@ -87,10 +74,13 @@ function FeatureCards() {
         <div className={styles.featureGrid}>
           {features.map((feature) => (
             <article className={styles.featureCard} key={feature.title}>
-              <ScreenshotLink src={feature.image} alt={feature.alt} />
               <Heading as="h3" className={styles.featureTitle}>
                 {feature.title}
               </Heading>
+              <p className={styles.featureText}>{feature.description}</p>
+              <Link className={styles.featureLink} to={feature.to}>
+                Read more
+              </Link>
             </article>
           ))}
         </div>
@@ -99,46 +89,22 @@ function FeatureCards() {
   );
 }
 
-function DetailSection() {
+function DocsPath() {
   return (
-    <section className={styles.detailSection}>
-      <div className={clsx('container', styles.detailGrid)}>
+    <section className={styles.docsPathSection}>
+      <div className={clsx('container', styles.docsPathGrid)}>
         <div>
-          <p className={styles.eyebrow}>Peer details</p>
+          <p className={styles.eyebrow}>Start operating</p>
           <Heading as="h2" className={styles.sectionTitle}>
-            Drill into each connection
+            Follow the deployment path
           </Heading>
           <p className={styles.sectionText}>
-            Inspect peer state, endpoint data, transfer totals, and generated configuration in one place.
+            Install the Console, connect a Node, then create peers and generate client configs.
           </p>
         </div>
-        <div className={styles.detailScreenshot}>
-          <ScreenshotLink
-            src={`${screenshotPath}wgkeeper-peer-details-light.png`}
-            alt="WGKeeper peer details drawer"
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DarkModeSection() {
-  return (
-    <section className={styles.section}>
-      <div className={clsx('container', styles.darkModeGrid)}>
-        <div>
-          <p className={styles.eyebrow}>Dark mode included</p>
-          <Heading as="h2" className={styles.sectionTitle}>
-            Manage nodes in a darker workspace
-          </Heading>
-        </div>
-        <div className={styles.darkScreenshot}>
-          <ScreenshotLink
-            src={`${screenshotPath}wgkeeper-nodes-dark.png`}
-            alt="WGKeeper Console nodes screen in dark mode"
-          />
-        </div>
+        <Link className={clsx('button button--lg', styles.secondaryButton)} to="/docs/console/installation">
+          Start with Console Installation
+        </Link>
       </div>
     </section>
   );
@@ -154,8 +120,7 @@ export default function Home(): ReactNode {
       <HomepageHeader />
       <main>
         <FeatureCards />
-        <DetailSection />
-        <DarkModeSection />
+        <DocsPath />
       </main>
     </Layout>
   );

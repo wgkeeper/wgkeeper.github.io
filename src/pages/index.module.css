@@ -75,40 +75,19 @@
 }
 
 .heroScreenshot,
-.featureCard,
-.detailScreenshot,
-.darkScreenshot {
+.featureCard {
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 8px;
   background: #ffffff;
   overflow: hidden;
 }
 
-.heroScreenshot,
-.detailScreenshot,
-.darkScreenshot {
+.heroScreenshot {
   box-shadow: 0 20px 56px rgba(15, 23, 42, 0.11);
 }
 
-.screenshotLink {
-  display: block;
-  color: inherit;
-  cursor: zoom-in;
-}
-
-.screenshotLink img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.screenshotLink:focus-visible {
-  outline: 2px solid #0f766e;
-  outline-offset: -2px;
-}
-
 .section,
-.detailSection {
+.docsPathSection {
   padding: 3rem 0;
 }
 
@@ -139,27 +118,48 @@
 .featureCard {
   display: flex;
   flex-direction: column;
+  padding: 1.15rem;
 }
 
 .featureTitle {
-  margin: 0;
-  padding: 0.95rem 1rem 1rem;
+  margin: 0 0 0.55rem;
   color: #0f172a;
   font-size: 1.05rem;
 }
 
-.detailSection {
+.featureText {
+  margin: 0 0 1rem;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.featureLink {
+  margin-top: auto;
+  font-weight: 700;
+}
+
+.docsPathSection {
   background: var(--wg-surface-subtle);
   border-top: 1px solid var(--wg-border);
   border-bottom: 1px solid var(--wg-border);
 }
 
-.detailGrid,
-.darkModeGrid {
+.docsPathGrid {
   display: grid;
-  grid-template-columns: minmax(16rem, 0.6fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 2rem;
   align-items: center;
+}
+
+.secondaryButton {
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  color: #0f766e;
+  background: #ffffff;
+}
+
+.secondaryButton:hover {
+  color: #0c675f;
+  background: #f8fafc;
 }
 
 [data-theme='dark'] .heroBanner {
@@ -193,9 +193,7 @@
 }
 
 [data-theme='dark'] .heroScreenshot,
-[data-theme='dark'] .featureCard,
-[data-theme='dark'] .detailScreenshot,
-[data-theme='dark'] .darkScreenshot {
+[data-theme='dark'] .featureCard {
   border: 1px solid rgba(148, 163, 184, 0.14);
   background: #0f172a;
 }
@@ -204,8 +202,23 @@
   color: #f8fafc;
 }
 
-[data-theme='dark'] .detailSection {
+[data-theme='dark'] .featureText {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .docsPathSection {
   background: #07101b;
+}
+
+[data-theme='dark'] .secondaryButton {
+  border-color: rgba(52, 211, 153, 0.3);
+  color: #7ae6c2;
+  background: #0f172a;
+}
+
+[data-theme='dark'] .secondaryButton:hover {
+  color: #a7f3d0;
+  background: #111c2f;
 }
 
 @media screen and (max-width: 996px) {
@@ -223,8 +236,7 @@
   }
 
   .featureGrid,
-  .detailGrid,
-  .darkModeGrid {
+  .docsPathGrid {
     grid-template-columns: 1fr;
   }
 }
@@ -239,7 +251,7 @@
   }
 
   .section,
-  .detailSection {
+  .docsPathSection {
     padding: 2.25rem 0;
   }
 }
