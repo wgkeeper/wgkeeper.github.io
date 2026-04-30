@@ -9,8 +9,10 @@ WGKeeper Node is installed with Docker Compose.
 
 There are two modes:
 
-- **Simple Docker Compose**
-- **Docker Compose with Caddy** for a more advanced setup
+- **Simple Docker Compose** — the easiest path; recommended for trying the node out
+- **Docker Compose with Caddy** — recommended for production (HTTPS, reverse proxy)
+
+If unsure, start with Simple. You can switch to the Caddy variant later without re-installing.
 
 ## Configuration example
 
@@ -64,7 +66,7 @@ Use this for a simple and standard setup.
 ```yaml
 services:
   wireguard:
-    image: ghcr.io/wgkeeper/node:1.2.0
+    image: ghcr.io/wgkeeper/node:1.3.0
     restart: always
     cap_add:
       - NET_ADMIN
@@ -121,7 +123,7 @@ Use this if you want a more advanced setup with a reverse proxy in front of the 
 ```yaml
 services:
   wireguard:
-    image: ghcr.io/wgkeeper/node:1.2.0
+    image: ghcr.io/wgkeeper/node:1.3.0
     restart: always
     cap_add:
       - NET_ADMIN
@@ -207,3 +209,9 @@ docker compose -f docker-compose.prod-secure.yml up -d
 ## Recommendation
 
 The Caddy-based setup is the recommended option for production.
+
+## Optional: monitoring
+
+The node can expose a Prometheus `/metrics` endpoint. It is **off by default** and toggled in `config.yaml`.
+
+If you want to add it later, see [Metrics](./metrics.md). Keep the metrics port inside the Docker network — do not publish it on the host.

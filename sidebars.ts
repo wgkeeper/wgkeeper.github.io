@@ -3,6 +3,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     'intro',
+    'quick-start',
     {
       type: 'category',
       label: 'Console',
@@ -11,7 +12,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Node',
-      items: ['node/installation', 'node/configuration'],
+      items: ['node/installation', 'node/configuration', 'node/metrics'],
     },
   ],
 };

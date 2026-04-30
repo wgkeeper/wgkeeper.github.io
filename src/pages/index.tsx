@@ -14,17 +14,36 @@ const features = [
   {
     title: 'Node health and capacity',
     description: 'Track node status, version, peer capacity, and health from one Console view.',
-    to: '/docs/console/using-the-console',
   },
   {
     title: 'Peer management',
     description: 'Create peers, inspect connection state, and verify handshakes after clients connect.',
-    to: '/docs/console/managing-peers-and-configs',
   },
   {
     title: 'Config generation',
     description: 'Generate WireGuard client configs after assigning peers to the right node.',
-    to: '/docs/console/managing-peers-and-configs#generate-client-config',
+  },
+  {
+    title: 'Metrics & monitoring',
+    description: 'Optional Prometheus endpoint per node, with a ready-made Grafana dashboard.',
+  },
+];
+
+const steps = [
+  {
+    title: 'Install the Console',
+    description: 'Spin up the central control plane with Docker Compose.',
+    to: '/docs/console/installation',
+  },
+  {
+    title: 'Connect a Node',
+    description: 'Run the Node service and link it from the Console with its API endpoint and key.',
+    to: '/docs/node/installation',
+  },
+  {
+    title: 'Create peers',
+    description: 'Allocate IPs, generate WireGuard client configs, and monitor handshakes.',
+    to: '/docs/console/managing-peers-and-configs',
   },
 ];
 
@@ -38,18 +57,32 @@ function HomepageHeader() {
             Centralized management for VPN infrastructure
           </Heading>
           <p className={styles.heroText}>
-            WGKeeper is an open-source system for managing WireGuard®
-            infrastructure at scale.
-          </p>
-          <p className={styles.heroNote}>
-            It consists of a central Console for orchestration and Node
-            services that run on the servers themselves.
+            An open-source system for managing WireGuard®
+            infrastructure at scale — a central Console for orchestration
+            paired with Node services running on each server.
           </p>
           <div className={styles.buttons}>
-            <Link className={clsx('button button--lg', styles.primaryButton)} to="/docs">
-              Open Documentation
+            <Link className={clsx('button button--lg', styles.primaryButton)} to="/docs/quick-start">
+              Quick start
+            </Link>
+            <Link
+              className={clsx('button button--lg', styles.ghostButton)}
+              to="https://github.com/wgkeeper/wgkeeper">
+              <span className={styles.ghButtonIcon} aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor">
+                  <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 005.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+                </svg>
+              </span>
+              GitHub
             </Link>
           </div>
+          <p className={styles.trustRow}>
+            <span>AGPL-3.0</span>
+            <span aria-hidden="true">·</span>
+            <span>Self-hosted</span>
+            <span aria-hidden="true">·</span>
+            <span>Docker-ready</span>
+          </p>
         </div>
         <div className={styles.heroScreenshot}>
           <ScreenshotZoom
@@ -78,9 +111,6 @@ function FeatureCards() {
                 {feature.title}
               </Heading>
               <p className={styles.featureText}>{feature.description}</p>
-              <Link className={styles.featureLink} to={feature.to}>
-                Read more
-              </Link>
             </article>
           ))}
         </div>
@@ -92,19 +122,32 @@ function FeatureCards() {
 function DocsPath() {
   return (
     <section className={styles.docsPathSection}>
-      <div className={clsx('container', styles.docsPathGrid)}>
-        <div>
+      <div className="container">
+        <div className={styles.docsPathHeader}>
           <p className={styles.eyebrow}>Start operating</p>
           <Heading as="h2" className={styles.sectionTitle}>
             Follow the deployment path
           </Heading>
           <p className={styles.sectionText}>
-            Install the Console, connect a Node, then create peers and generate client configs.
+            Three steps to a working setup. Each step links to the detailed guide.
           </p>
         </div>
-        <Link className={clsx('button button--lg', styles.secondaryButton)} to="/docs/console/installation">
-          Start with Console Installation
-        </Link>
+        <ol className={styles.stepsGrid}>
+          {steps.map((step, idx) => (
+            <li className={styles.stepCard} key={step.title}>
+              <span className={styles.stepNumber} aria-hidden="true">
+                {String(idx + 1).padStart(2, '0')}
+              </span>
+              <Heading as="h3" className={styles.stepTitle}>
+                {step.title}
+              </Heading>
+              <p className={styles.stepText}>{step.description}</p>
+              <Link className={styles.stepLink} to={step.to}>
+                Read the guide
+              </Link>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import {useEffect, useId, useState} from 'react';
+import {createPortal} from 'react-dom';
 
 import styles from './styles.module.css';
 
@@ -22,11 +23,19 @@ export default function ScreenshotZoom({src, alt}: ScreenshotZoomProps) {
       }
     }
 
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+
     document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     window.addEventListener('keydown', onKeyDown);
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [isOpen]);
@@ -40,26 +49,32 @@ export default function ScreenshotZoom({src, alt}: ScreenshotZoomProps) {
         aria-label={`Open larger screenshot: ${alt}`}>
         <img src={src} alt={alt} />
       </button>
-      {isOpen && (
-        <div
-          className={styles.overlay}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={titleId}
-          onClick={() => setIsOpen(false)}>
-          <div className={styles.dialog} onClick={(event) => event.stopPropagation()}>
-            <div className={styles.toolbar}>
-              <p className={styles.title} id={titleId}>
-                {alt}
-              </p>
-              <button className={styles.closeButton} type="button" onClick={() => setIsOpen(false)}>
-                Close
-              </button>
+      {isOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            className={styles.overlay}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            onClick={() => setIsOpen(false)}>
+            <div className={styles.dialog} onClick={(event) => event.stopPropagation()}>
+              <div className={styles.toolbar}>
+                <p className={styles.title} id={titleId}>
+                  {alt}
+                </p>
+                <button
+                  className={styles.closeButton}
+                  type="button"
+                  onClick={() => setIsOpen(false)}>
+                  Close
+                </button>
+              </div>
+              <img className={styles.fullImage} src={src} alt="" />
             </div>
-            <img className={styles.fullImage} src={src} alt="" />
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

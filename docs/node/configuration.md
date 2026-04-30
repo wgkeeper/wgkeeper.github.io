@@ -37,6 +37,13 @@ wireguard:
   # peer_store_file: "/app/peers/peers.db"
   routing:
     wan_interface: "eth0"
+# Optional: Prometheus /metrics endpoint. Off by default.
+# metrics:
+#   port: 9090
+#   token: "REPLACE_WITH_32+_RANDOM_CHARS"
+#   # Optional per-peer series (off by default; expand cardinality with peer count)
+#   per_peer: false
+#   per_peer_max: 100
 ```
 
 ## Main settings
@@ -88,6 +95,14 @@ wireguard:
 - Optional persistent peer store path
 - Enables peer persistence on disk
 - Without it, peers are stored only in memory and will be lost after a node restart
+
+`metrics`
+
+- Optional Prometheus `/metrics` endpoint; off by default
+- When the section is present, both `port` and `token` are required
+- `token` must be at least 32 characters and **must differ** from `auth.api_key` — startup fails otherwise
+- Generate one with `openssl rand -hex 32`
+- See the [Metrics](./metrics.md) page for what is exposed and how to scrape it
 
 ## What to adjust
 
