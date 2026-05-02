@@ -41,6 +41,11 @@ services:
       SECRET_KEY: paste-generated-64-char-hex-key-here
       BOOTSTRAP_ADMIN_PASSWORD: change-me-now
       COOKIE_SECURE: "true"
+      # Trust X-Forwarded-For from Caddy on the internal Docker network so
+      # per-IP rate limits apply per real client, not to all users via the
+      # proxy IP. Port 8000 is not published, so only the proxy can reach
+      # the app.
+      TRUSTED_PROXIES: "172.16.0.0/12,192.168.0.0/16,10.0.0.0/8,127.0.0.1"
     volumes:
       - wgkeeper-console-data:/app/data
     restart: unless-stopped
@@ -142,6 +147,7 @@ Optional variables:
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `BOOTSTRAP_ADMIN_USERNAME` | `admin` | Initial admin username |
+| `TRUSTED_PROXIES` | none | Comma-separated list of CIDRs/IPs whose `X-Forwarded-For` is trusted. Set this when running behind a reverse proxy so per-IP rate limits apply to the real client IP. |
 | `DOCS` | `false` | Enables Swagger UI at `/docs/index.html` |
 | `DEBUG` | `false` | Enables debug logging |
 
