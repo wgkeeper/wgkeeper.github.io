@@ -21,7 +21,7 @@ Create `docker-compose.yaml`:
 ```yaml
 services:
   wgkeeper-console:
-    image: ghcr.io/wgkeeper/console:1.0.0
+    image: ghcr.io/wgkeeper/console
     ports:
       - "8000:8000"
     environment:
@@ -74,7 +74,7 @@ Create `docker-compose.yaml`:
 ```yaml
 services:
   wireguard:
-    image: ghcr.io/wgkeeper/node:1.3.0
+    image: ghcr.io/wgkeeper/node
     restart: always
     cap_add: [NET_ADMIN, SYS_MODULE]
     volumes:

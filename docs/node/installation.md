@@ -66,7 +66,7 @@ Use this for a simple and standard setup.
 ```yaml
 services:
   wireguard:
-    image: ghcr.io/wgkeeper/node:1.3.0
+    image: ghcr.io/wgkeeper/node
     restart: always
     cap_add:
       - NET_ADMIN
@@ -123,7 +123,7 @@ Use this if you want a more advanced setup with a reverse proxy in front of the 
 ```yaml
 services:
   wireguard:
-    image: ghcr.io/wgkeeper/node:1.3.0
+    image: ghcr.io/wgkeeper/node
     restart: always
     cap_add:
       - NET_ADMIN
