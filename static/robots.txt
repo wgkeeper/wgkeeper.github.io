@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wgkeeper.github.io/sitemap.xml
