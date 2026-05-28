@@ -15,13 +15,29 @@
 }
 
 .preview:focus-visible {
-  outline: 2px solid #0f766e;
+  outline: 2px solid var(--wg-ring);
   outline-offset: -2px;
+}
+
+.themeDark {
+  display: none;
+}
+
+[data-theme='light'] .themeDark {
+  display: none;
+}
+
+[data-theme='dark'] .themeLight {
+  display: none;
+}
+
+[data-theme='dark'] .themeDark {
+  display: block;
 }
 
 .overlay {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--wg-z-modal, 1300);
   inset: 0;
   display: flex;
   align-items: center;

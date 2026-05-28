@@ -6,9 +6,11 @@ import styles from './styles.module.css';
 type ScreenshotZoomProps = {
   src: string;
   alt: string;
+  /** Optional dark-theme variant; shown via CSS when [data-theme='dark']. */
+  srcDark?: string;
 };
 
-export default function ScreenshotZoom({src, alt}: ScreenshotZoomProps) {
+export default function ScreenshotZoom({src, alt, srcDark}: ScreenshotZoomProps) {
   const [isOpen, setIsOpen] = useState(false);
   const titleId = useId();
 
@@ -47,7 +49,14 @@ export default function ScreenshotZoom({src, alt}: ScreenshotZoomProps) {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label={`Open larger screenshot: ${alt}`}>
-        <img src={src} alt={alt} />
+        {srcDark ? (
+          <>
+            <img className={styles.themeLight} src={src} alt="" />
+            <img className={styles.themeDark} src={srcDark} alt="" />
+          </>
+        ) : (
+          <img src={src} alt={alt} />
+        )}
       </button>
       {isOpen &&
         typeof document !== 'undefined' &&
@@ -70,7 +79,14 @@ export default function ScreenshotZoom({src, alt}: ScreenshotZoomProps) {
                   Close
                 </button>
               </div>
-              <img className={styles.fullImage} src={src} alt="" />
+              {srcDark ? (
+                <>
+                  <img className={`${styles.fullImage} ${styles.themeLight}`} src={src} alt="" />
+                  <img className={`${styles.fullImage} ${styles.themeDark}`} src={srcDark} alt="" />
+                </>
+              ) : (
+                <img className={styles.fullImage} src={src} alt="" />
+              )}
             </div>
           </div>,
           document.body,
