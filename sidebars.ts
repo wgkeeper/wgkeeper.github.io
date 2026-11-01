@@ -7,12 +7,28 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Console',
-      items: ['console/installation', 'console/using-the-console', 'console/managing-peers-and-configs'],
+      collapsed: false,
+      items: [
+        'console/installation',
+        'console/configuration',
+        'console/database-and-backups',
+        'console/using-the-console',
+        'console/managing-peers-and-configs',
+        'console/metrics-and-logs',
+        'console/security',
+      ],
     },
     {
       type: 'category',
       label: 'Node',
-      items: ['node/installation', 'node/configuration', 'node/metrics'],
+      collapsed: false,
+      items: ['node/installation', 'node/configuration', 'node/api', 'node/metrics', 'node/security'],
+    },
+    {
+      type: 'category',
+      label: 'Guides',
+      collapsed: false,
+      items: ['guides/reverse-proxy', 'guides/troubleshooting', 'upgrading'],
     },
   ],
 };

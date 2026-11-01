@@ -1,141 +1,124 @@
 ---
-sidebar_position: 5
 title: Metrics
+description: Enable the wgkeeper node Prometheus endpoint, scrape it from inside Docker, and use the bundled alerting rules and Grafana dashboard.
 ---
 
-# Metrics
+# Node metrics
 
-wgkeeper node can expose a Prometheus `/metrics` endpoint.
+wgkeeper node can serve Prometheus metrics at `/metrics` on a separate port. They are off until you add a `metrics` section to `config.yaml`. The full reference is [Metrics](https://github.com/wgkeeper/wgkeeper-node/blob/main/docs/metrics.md) in the node repository.
 
-It is **off by default**. Enable it when you want to monitor a node with Prometheus, Grafana, or any compatible TSDB. When enabled, it runs on its own HTTP listener with mandatory bearer auth, separate from the API key.
+## Turn metrics on
 
-If you don't need monitoring, leave the section out — nothing else changes.
+1. Add a `metrics` section to `config.yaml`:
 
-## Quick start
+   ```yaml
+   metrics:
+     port: 9090
+     token: "<at least 32 characters>"
+   ```
 
-Three steps:
+   Generate the token with `openssl rand -hex 32`. It must be at least 32 characters and different from `auth.api_key`, or the node refuses to start.
 
-### 1. Enable in `config.yaml`
+2. Restart the node:
 
-Add a `metrics` section. The same `config.yaml` is described in [Node Configuration](./configuration.md).
+   ```bash
+   cd /opt/wgkeeper && docker compose restart
+   ```
+
+## How the endpoint behaves
+
+| Request | Response |
+| --- | --- |
+| `GET /metrics` with `Authorization: Bearer <token>` | `200` with the metrics |
+| Missing or wrong token | `401`. Rejections are logged at most once a second |
+| More than 5 requests per second (bursts up to 10), after the token check | `429` with `Retry-After: 1` |
+| Any method other than `GET` | `405` |
+
+The port listens on all interfaces. Keep it private; see [below](#keep-the-metrics-port-private).
+
+## Scrape it with Prometheus
+
+Run Prometheus in the same Compose project as the node and scrape `wireguard:9090` over the Docker network. [`docker-compose.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/docker-compose.yml) has a commented-out `prometheus` service that mounts the repository's example configs.
+
+1. Write the token to a file next to `docker-compose.yml`. The file must exist before `docker compose up`, or Docker mounts an empty directory in its place. Prometheus runs as `nobody`, so make the file readable:
+
+   ```bash
+   openssl rand -hex 32 > ./wgkeeper-token
+   chmod 644 ./wgkeeper-token
+   ```
+
+   Put the same value in `metrics.token`.
+
+2. Copy [`examples/prometheus/prometheus.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/examples/prometheus/prometheus.yml) and [`examples/prometheus/alerts.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/examples/prometheus/alerts.yml) into `examples/prometheus/`. The install script doesn't download them.
+
+3. Uncomment the `prometheus` service and the `prometheus_data` volume in `docker-compose.yml`. With the install script, put them in `docker-compose.override.yml` instead, because the script replaces `docker-compose.yml` on every update.
+
+4. Start it:
+
+   ```bash
+   docker compose up -d
+   ```
+
+The scrape config reads the token from the file:
 
 ```yaml
-metrics:
-  port: 9090
-  token: "REPLACE_WITH_32+_RANDOM_CHARS"
+scrape_configs:
+  - job_name: wgkeeper
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/wgkeeper-token
+    static_configs:
+      - targets: ["wireguard:9090"]
 ```
 
-Generate a token:
+## Alerts and dashboard
 
-```bash
-openssl rand -hex 32
-```
+- [`examples/prometheus/alerts.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/examples/prometheus/alerts.yml): alerting rules for a down node, a failed peer store rollback, a subnet over 90% used or full, failing peer operations, API server errors and bursts of client errors.
+- [`examples/grafana/dashboard.json`](https://github.com/wgkeeper/wgkeeper-node/blob/main/examples/grafana/dashboard.json): a Grafana dashboard. In Grafana, open **Dashboards**, import the file and pick your Prometheus data source.
 
-Use the same value for `metrics.token` and for the Prometheus scraper in step 2.
+## Exported metrics
 
-### 2. Scrape with Prometheus
+| Metric | Type | Labels | Use |
+| --- | --- | --- | --- |
+| `wgkeeper_peers` | gauge | `state` | Capacity and usage |
+| `wgkeeper_peer_operations_total` | counter | `op`, `result` | Throughput and error rate |
+| `wgkeeper_peer_operation_duration_seconds` | histogram | `op` | Latency of API peer operations (`create`, `rotate`, `delete`) |
+| `wgkeeper_persist_rollback_total` | counter | `op` | Store writes rolled back after a failed device change |
+| `wgkeeper_persist_rollback_failed_total` | counter | | Rollbacks that failed, so the store and the device disagree until the next restart. Alert on any increase |
+| `wgkeeper_wireguard_rx_bytes_total` | counter | | Bytes received from all peers since the interface came up |
+| `wgkeeper_wireguard_tx_bytes_total` | counter | | Bytes sent to all peers since the interface came up |
+| `wgkeeper_wireguard_stale_peers` | gauge | | Peers with no handshake in the last 5 minutes, or none at all |
+| `wgkeeper_http_requests_total` | counter | `method`, `path`, `status_class` | API traffic, error rate, bursts of `401` |
+| `wgkeeper_http_request_duration_seconds` | histogram | `method`, `path` | Latency per endpoint |
+| `process_*`, `go_*` | | | Standard process and Go runtime metrics |
 
-Add a Prometheus service to the same Docker Compose as the node. The node repo ships ready templates:
+### Label values
 
-- [`docker-compose.local.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/docker-compose.local.yml) — has a commented-out `prometheus` block; uncomment it.
-- [`docs/prometheus.example.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/docs/prometheus.example.yml) — drop-in scrape config.
+| Label | Values |
+| --- | --- |
+| `state` | `possible` (capacity of the subnets, capped at 2^53), `issued` (peers in the store), `active` (handshake in the last 2 minutes) |
+| `op` | `create`, `rotate`, `delete`, `expire` |
+| `result` | `success`, `error_no_ip`, `error_persist`, `error_device`, `error_unsupported_family`, `error_not_found`, `error_internal` |
+| `path` | The route template, such as `/peers/:peerId`, so peer IDs don't create new series. Unknown routes are `unmatched`. `/healthz` and `/readyz` are counted too |
+| `method` | `GET`, `POST`, `DELETE`, `HEAD`, `OPTIONS`, or `other` for any other method and for unknown routes |
+| `status_class` | `2xx`, `3xx`, `4xx`, `5xx` |
 
-Save the same hex string into a token file:
+If the node can't read the WireGuard device during a scrape, `wgkeeper_peers` and the `wgkeeper_wireguard_*` metrics are left out of that response rather than reported as zero.
 
-```bash
-openssl rand -hex 32 | tee ./wgkeeper-token
-```
+Per-peer traffic and handshakes aren't exported, because a series per peer grows with every peer and flaps as peers come and go. Use `GET /peers` and `GET /peers/:peerId` from the [API](/docs/node/api) instead.
 
-Start:
+## Keep the metrics port private
 
-```bash
-docker compose -f docker-compose.local.yml up -d
-```
+Peer counts, version and capacity tell an attacker a lot, so keep the port off the internet even with the token.
 
-Prometheus reaches the node via Docker DNS (`http://wireguard:9090`). Nothing is published on the host.
+:::danger
 
-### 3. (Optional) Import the Grafana dashboard
+In Docker, never add `9090:9090` to the node's `ports:`. Scrape it from inside the Docker network.
 
-A pre-built dashboard is provided: [`docs/grafana-dashboard.json`](https://github.com/wgkeeper/wgkeeper-node/blob/main/docs/grafana-dashboard.json).
+:::
 
-1. Install Grafana and point it at the same Prometheus instance.
-2. **Dashboards → New → Import** and upload `grafana-dashboard.json`.
-3. Pick the Prometheus data source when prompted.
-
-Grafana is optional. The node only exposes metrics — visualisation, alerts, and storage are your choice.
-
-## Reference
-
-### Configuration fields
-
-| Field | Type | Default | Notes |
-|-------|------|---------|-------|
-| `metrics.port` | int | — | Required when the section is present |
-| `metrics.token` | string | — | Required; at least 32 chars; **must differ** from `auth.api_key` |
-| `metrics.per_peer` | bool | `false` | Expose per-peer series (rx/tx, last handshake) |
-| `metrics.per_peer_max` | int | `100` | Cardinality cap when `per_peer: true` |
-
-If `metrics.token` is missing, too short, or equal to `auth.api_key`, the node refuses to start.
-
-The full annotated example lives in [`config.example.yaml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/config.example.yaml).
-
-### What is exposed
-
-| Metric | Type | Use |
-|--------|------|-----|
-| `wgkeeper_peers` | gauge | capacity / utilisation by state |
-| `wgkeeper_peer_operations_total` | counter | error rate, throughput |
-| `wgkeeper_peer_operation_duration_seconds` | histogram | p99 latency |
-| `wgkeeper_persist_rollback_total` | counter | crash-safety rollbacks fired |
-| `wgkeeper_persist_rollback_failed_total` | counter | page on this — bbolt holds a record device-write rolled back from |
-| `wgkeeper_wireguard_rx_bytes_total` | counter | total received bytes across all peers |
-| `wgkeeper_wireguard_tx_bytes_total` | counter | total transmitted bytes across all peers |
-| `wgkeeper_wireguard_stale_peers` | gauge | peers with no handshake in the last 5 min |
-| `wgkeeper_http_requests_total` | counter | API throughput, error rate, 401-burst detection |
-| `wgkeeper_http_request_duration_seconds` | histogram | per-endpoint p99 latency |
-| `process_*`, `go_*` | — | standard process and Go runtime |
-
-The HTTP `path` label uses the route template (e.g. `/peers/:peerId`), never the raw URL — UUIDs would explode cardinality. Unmatched routes are bucketed under `path="unmatched"`.
-
-### Per-peer metrics (advanced)
-
-With `metrics.per_peer: true`:
-
-| Metric | Type | Labels |
-|--------|------|--------|
-| `wgkeeper_peer_rx_bytes_total` | counter | `peer_id`, `allowed_ip` |
-| `wgkeeper_peer_tx_bytes_total` | counter | `peer_id`, `allowed_ip` |
-| `wgkeeper_peer_last_handshake_seconds` | gauge (age) | `peer_id`, `allowed_ip` |
-| `wgkeeper_peers_capped` | gauge | — |
-
-`metrics.per_peer_max` caps cardinality. The collector keeps the **top-N peers by current scrape-window traffic** — quieter peers fall out of metrics but remain visible via `GET /peers/:id`. `wgkeeper_peers_capped` reports how many peers were excluded.
-
-Suggested values:
-
-| Active peers | `per_peer_max` |
-|--------------|----------------|
-| < 500 | 500 |
-| 500 – 2 000 | 200 |
-| 2 000 – 10 000 | 100 *(default)* |
-| 10 000+ | 50 |
-| 50 000+ | keep `per_peer: false` |
-
-## Security
-
-### Do not publish the metrics port on the host
-
-In Docker, **never** add `9090:9090` to the `wireguard` service `ports:`. Operational signal (peer counts, version, capacity) on the public internet without mTLS is a recon channel.
-
-The provided compose files already follow this rule:
-
-- [`docker-compose.local.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/docker-compose.local.yml) — Prometheus runs alongside the node; nothing is published.
-- [`docker-compose.prod-secure.yml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/docker-compose.prod-secure.yml) — only WireGuard UDP is exposed; metrics stay internal.
-
-### Production scraping
-
-For production, keep `/metrics` on the internal network. For external scraping, either:
-
-- run Prometheus in the same compose, or
-- add a separate Caddy site (e.g. `metrics.example.com`) with **client cert auth (mTLS)** that proxies to `wireguard:9090`.
-
-Do not expose `/metrics` over the public internet behind only the bearer token.
+| Setup | What to do |
+| --- | --- |
+| Prometheus in the same Compose project | Scrape `wireguard:9090`, as above |
+| Prometheus elsewhere | Add a separate site in your reverse proxy, for example `metrics.example.com`, with client certificate (mTLS) authentication that proxies to the metrics port |
+| Bare metal | Allow `9090/tcp` in the firewall only from `127.0.0.1` or your Prometheus host |

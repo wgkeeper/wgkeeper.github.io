@@ -1,156 +1,135 @@
 ---
-sidebar_position: 4
-title: Node Configuration
+title: Configuration
+description: Every key in the wgkeeper node config.yaml, its default, and the environment variables the node reads.
 ---
 
-# Node Configuration
+# Node configuration
 
-wgkeeper node reads configuration from `config.yaml`.
+wgkeeper node reads its settings from `config.yaml` once, at startup. The annotated example is [`config.example.yaml`](https://github.com/wgkeeper/wgkeeper-node/blob/main/config.example.yaml).
 
-Use this page to understand what to adjust.
+## Smallest config
 
-## Example
+Everything except the API key and a subnet has a default:
 
 ```yaml
-server:
-  port: 51821
-  # Optional: enable HTTPS (set both paths)
-  # tls_cert: "/app/certs/fullchain.pem"
-  # tls_key: "/app/certs/privkey.pem"
-  # Optional: allow API access only from these IPv4/IPv6 addresses or CIDRs (omit or leave empty to allow all)
-  # allowed_ips:
-  #   - "10.0.0.0/24"
-  #   - "fd00::1"
 auth:
-  api_key: "changeme"
+  api_key: "<at least 32 characters>"
 wireguard:
-  interface: "wg0"
-  # At least one of subnet or subnet6 is required. You can set both for dual-stack.
   subnet: "10.0.0.0/24"
-  server_ip: "10.0.0.1"
-  # Optional: IPv6 (any prefix, e.g. /64, /112, /128; for /64 the first 65536 addresses are used)
-  # subnet6: "fd00::/112"
-  # server_ip6: "fd00::1"
-  listen_port: 51820
-  # Optional: persist peer store to a bbolt DB file (load on startup, save on every change).
-  # For Docker: use "/app/peers/peers.db" and mount ./peers:/app/peers so the app creates the file.
-  # peer_store_file: "/app/peers/peers.db"
-  routing:
-    wan_interface: "eth0"
-# Optional: Prometheus /metrics endpoint. Off by default.
-# metrics:
-#   port: 9090
-#   token: "REPLACE_WITH_32+_RANDOM_CHARS"
-#   # Optional per-peer series (off by default; expand cardinality with peer count)
-#   per_peer: false
-#   per_peer_max: 100
 ```
 
-## Main settings
+Generate the API key with:
 
-`server.port`
+```bash
+openssl rand -hex 32
+```
 
-- API port for the node service
+The [install script](/docs/node/installation#install-with-the-script) writes this file with a random key and the subnet from `--subnet`.
 
-`server.allowed_ips`
+:::warning[Unknown keys stop the node]
 
-- Optional IP allowlist for protected API access
-- If set, protected endpoints require both a valid API key and a whitelisted IP
-- If not set, protected endpoints still require the API key and rate limiting is applied
+A misspelled or unknown key is an error that names the key, so no setting is silently ignored. Keys removed in 2.0.0 also stop the node: `server.tls_cert`, `server.tls_key`, `server.allowed_ips`, `server.trusted_proxies`, `metrics.per_peer` and `metrics.per_peer_max`. See [Upgrading to 2.0](/docs/upgrading#breaking-changes).
 
-`server.tls_cert` and `server.tls_key`
+:::
 
-- Optional HTTPS certificate and key paths
-- Set both together
-- Recommended if you expose the node API directly without Caddy
-- If you use Caddy, terminate HTTPS in Caddy instead and leave these unset
+## API
 
-`auth.api_key`
+| Key | Default | Description |
+| --- | --- | --- |
+| `auth.api_key` | required | API key for all protected endpoints, at least 32 characters. Leading and trailing spaces are trimmed |
+| `server.port` | `51821` | API port, `1` to `65535`. The API is plain HTTP on all interfaces |
 
-- Required API key for protected endpoints
+With the install script, keep `server.port` at `51821`. The script's Compose file, health check and readiness check all use that port. In your own Compose file, change the published port and the health check together with it.
 
-`wireguard.interface`
+The node has no settings for TLS, IP allowlists or rate limits. They belong in the [reverse proxy](/docs/guides/reverse-proxy).
 
-- WireGuard® interface name, for example `wg0`
+## WireGuard
 
-`wireguard.listen_port`
+At least one of `wireguard.subnet` and `wireguard.subnet6` is required. Set both for dual-stack.
 
-- UDP port for WireGuard® traffic
+| Key | Default | Description |
+| --- | --- | --- |
+| `wireguard.interface` | `wg0` | Interface name. Up to 15 letters, digits, `-`, `_` and `.` |
+| `wireguard.listen_port` | `51820` | WireGuard UDP port, `1` to `65535` |
+| `wireguard.subnet` | none | IPv4 CIDR for peer addresses, prefix up to `/30` |
+| `wireguard.server_ip` | first host of `subnet` | IPv4 address of the server. Must be inside `subnet` |
+| `wireguard.subnet6` | none | IPv6 CIDR for peer addresses, prefix up to `/126` |
+| `wireguard.server_ip6` | first host of `subnet6` | IPv6 address of the server. Must be inside `subnet6` |
+| `wireguard.routing.wan_interface` | interface of the default route | Outbound interface for the NAT rules, for example `eth0`. Letters, digits, `-`, `_` and `.` only |
+| `wireguard.routing.allow_private_networks` | `false` | Let peers reach private and shared address space through the node. See [Peer isolation](/docs/node/security#peer-isolation) |
+| `wireguard.peer_store_file` | `/var/lib/wgkeeper/peers.db` | Path of the [peer store](#peer-store). Must not be a directory |
 
-`wireguard.subnet`
+Notes on these keys:
 
-- IPv4 subnet used for peer allocation
+- Peers get addresses from the subnet minus its network and broadcast addresses and the server address. There is no scan limit, so every free address in a large subnet is used.
+- If `listen_port` changes, publish the new UDP port in Compose too. With the install script, put the port in `docker-compose.override.yml`.
+- When `wan_interface` is unset, the node uses the IPv4 default route with the lowest metric, then the IPv6 one. It refuses to start if neither exists. Set the key for policy routing or when the default route isn't the way out.
 
-`wireguard.subnet6`
+### Dual-stack example
 
-- Optional IPv6 subnet
-- IPv4 is the default setup; IPv6 is configured additionally when needed
+```yaml
+auth:
+  api_key: "<at least 32 characters>"
+wireguard:
+  subnet: "10.0.0.0/24"
+  subnet6: "fd00::/112"
+```
 
-`wireguard.routing.wan_interface`
+### Let peers reach a private network
 
-- Outbound network interface used for routing and NAT
-
-`wireguard.peer_store_file`
-
-- Optional persistent peer store path
-- Enables peer persistence on disk
-- Without it, peers are stored only in memory and will be lost after a node restart
-
-`metrics`
-
-- Optional Prometheus `/metrics` endpoint; off by default
-- When the section is present, both `port` and `token` are required
-- `token` must be at least 32 characters and **must differ** from `auth.api_key` — startup fails otherwise
-- Generate one with `openssl rand -hex 32`
-- See the [Metrics](./metrics.md) page for what is exposed and how to scrape it
-
-## What to adjust
-
-- Use a strong `auth.api_key`
-- Check `wireguard.routing.wan_interface`
-- Use `server.allowed_ips` in production
-- Use Caddy if the API is exposed publicly
-
-## Access control
-
-Protected endpoints always require `auth.api_key`.
-
-`/healthz` and `/readyz` are public.
-
-If `server.allowed_ips` is not configured:
-
-- the API key is still required
-- request throttling is active
-
-If `server.allowed_ips` is configured:
-
-- the API key is still required
-- the client IP must also match the whitelist
-- throttling is disabled
-
-## HTTPS guidance
-
-- Without Caddy, HTTPS on the node API is recommended
-- With Caddy, configure HTTPS in Caddy and do not enable node TLS in `config.yaml`
-
-## Peer persistence
-
-By default, peers are stored only in memory on the node.
-
-That means they are removed after a restart.
-
-To persist peers, set `wireguard.peer_store_file`.
-
-Docker example:
+By default peers reach the internet only. To let them reach an office LAN or another private network through the node, set:
 
 ```yaml
 wireguard:
-  peer_store_file: "/app/peers/peers.db"
+  subnet: "10.0.0.0/24"
+  routing:
+    allow_private_networks: true
 ```
 
-In Docker, mount a writable directory for it:
+Cloud metadata addresses stay blocked. For the exact ranges, see [Peer isolation](/docs/node/security#peer-isolation).
 
-```yaml
-volumes:
-  - ./peers:/app/peers
+## Metrics
+
+Metrics are off while `metrics.port` is unset or `0`. See [Metrics](/docs/node/metrics).
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `metrics.port` | `0` (off) | Port of the `/metrics` endpoint, `1` to `65535` to turn it on |
+| `metrics.token` | required with `metrics.port` | Bearer token for `/metrics`, at least 32 characters and different from `auth.api_key`. Ignored while metrics are off |
+
+## Environment variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `NODE_CONFIG` | `config.yaml` in the working directory | Path of the config file. The Docker image reads `/app/config.yaml` |
+| `DEBUG` | off | `true` or `1` turns on debug-level logs. API responses don't change: internal error details only go to the log, next to the request's `X-Request-Id` |
+
+## What happens on start
+
+1. The node reads and validates `config.yaml`. Any error stops it with a message naming the key.
+2. It writes the WireGuard config from `config.yaml`: addresses, listen port, NAT and isolation rules. The file is `/etc/wireguard/<interface>.conf`, or `./wireguard/<interface>.conf` when not running as root.
+3. In the Docker image, the entrypoint brings the interface up with `wg-quick`.
+4. The node opens the [peer store](#peer-store), checks it against the subnets, syncs the interface to it and removes expired peers.
+5. The API starts. Expired peers are then removed every minute.
+
+The server private key is generated on the first start and kept in the WireGuard config, so the server's public key never changes. If that file exists without a valid `PrivateKey`, the node refuses to start rather than generate a new key.
+
+Don't edit the WireGuard config by hand; the node overwrites it. Change `config.yaml` and restart:
+
+```bash
+cd /opt/wgkeeper && docker compose restart
 ```
+
+## Peer store
+
+Peers are always stored in a bbolt file, `/var/lib/wgkeeper/peers.db` unless `wireguard.peer_store_file` says otherwise. The Compose file mounts `./data` there; keep that volume, or all peers are lost when the container is recreated.
+
+The store is the source of truth:
+
+- On startup the node adds stored peers missing on the interface and removes interface peers not in the store. Anything not created through the API, such as a manual `wg set`, is gone after a restart.
+- Every create, rotate, delete and expiry is written to the store before the interface changes. If the interface change fails, the store write is rolled back.
+- If the interface doesn't respond in time, the store write is kept and the node syncs the interface to it in the background.
+
+The node refuses to start, and deletes nothing, if a stored peer falls outside the configured subnets, holds the server address or shares an address with another peer. A subnet typo therefore can't wipe your peers. To change subnets on purpose, first delete the peers outside the new subnets through the API.
+
+The file is created with mode `0600`. It holds each peer's public key, preshared key, addresses and expiry, never the peer's private key. Details: [Peer store](https://github.com/wgkeeper/wgkeeper-node/blob/main/docs/peer-store.md).

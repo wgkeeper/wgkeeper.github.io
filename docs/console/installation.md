@@ -1,162 +1,197 @@
 ---
-sidebar_position: 2
 title: Installation
+description: Install wgkeeper console with the install script or Docker Compose, update it, or build it from source.
 ---
 
-# Console Installation
+# Console installation
 
-wgkeeper console is the central interface for managing wgkeeper nodes and WireGuard® peers.
-
-Use it to connect nodes, inspect peer state, download generated configs, and manage console access.
-
-The recommended production setup is Docker Compose with Caddy in front of the console.
+wgkeeper console is one container that serves the web interface and its API on one HTTP port, with SQLite as the default database.
 
 ## Requirements
 
-- Docker and Docker Compose
-- a stable `SECRET_KEY`
-- an initial admin password
-- a domain name if you use the recommended Caddy setup
+| | Requirement |
+| --- | --- |
+| Host | Docker with Docker Compose v2. The published image is built for `linux/amd64` only. The install script runs on Linux only |
+| Database | SQLite (default, a file in the data volume) or PostgreSQL |
+| Nodes | [wgkeeper node](/docs/node/installation) 2.0.0 or newer, reachable from the console over HTTP or HTTPS |
 
-Generate `SECRET_KEY` once and keep it stable between restarts:
+## Install with the script
+
+Run this on a Linux server:
 
 ```bash
-openssl rand -hex 32
+curl -fsSL https://raw.githubusercontent.com/wgkeeper/wgkeeper-console/main/scripts/install.sh | sudo bash
 ```
 
-## Recommended: Docker Compose with Caddy
+Without `--domain`, the console listens on `127.0.0.1:8000` only. Open it through an SSH tunnel, then go to `http://127.0.0.1:8000`:
 
-Use this setup when exposing wgkeeper console publicly. Caddy provides the public HTTP/HTTPS entrypoint and forwards traffic to the console container inside the Docker network.
-
-Create `docker-compose.yaml`:
-
-```yaml
-services:
-  wgkeeper-console:
-    image: ghcr.io/wgkeeper/console
-    container_name: wgkeeper-console
-    environment:
-      PORT: 8000
-      DATABASE_URL: file:/app/data/wgkeeper-console.db
-      SECRET_KEY: paste-generated-64-char-hex-key-here
-      BOOTSTRAP_ADMIN_PASSWORD: change-me-now
-      COOKIE_SECURE: "true"
-      # Trust X-Forwarded-For from Caddy on the internal Docker network so
-      # per-IP rate limits apply per real client, not to all users via the
-      # proxy IP. Port 8000 is not published, so only the proxy can reach
-      # the app.
-      TRUSTED_PROXIES: "172.16.0.0/12,192.168.0.0/16,10.0.0.0/8,127.0.0.1"
-    volumes:
-      - wgkeeper-console-data:/app/data
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:2
-    container_name: wgkeeper-console-caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      - wgkeeper-console
-    restart: unless-stopped
-
-volumes:
-  wgkeeper-console-data:
-  caddy-data:
-  caddy-config:
+```bash
+ssh -L 8000:127.0.0.1:8000 your-server
 ```
 
-Create `Caddyfile` and replace `console.example.com` with your real domain:
+For HTTPS, point a domain at the server and pass `--domain`. The script puts Caddy with a Let's Encrypt certificate in front of the console:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/wgkeeper/wgkeeper-console/main/scripts/install.sh | sudo bash -s -- --domain console.example.com
+```
+
+:::tip[Read the script first]
+
+The script runs as root. To review it first, download it, read it, then run the local copy:
+
+```bash
+curl -fsSL -o install.sh https://raw.githubusercontent.com/wgkeeper/wgkeeper-console/main/scripts/install.sh
+less install.sh
+sudo bash install.sh --domain console.example.com
+```
+
+:::
+
+### Options
+
+Pass options after `bash -s --` when piping, or directly after `install.sh` when running a local copy.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--version X.Y.Z` | latest stable release | Release to install, for example `2.0.0`. A leading `v` is accepted. The script supports 2.0.0 and newer |
+| `--domain NAME` | none | Add Caddy with a Let's Encrypt certificate for this domain. It must point at the server, with ports 80 and 443 reachable. Applied only on the first run with Caddy; later, edit `examples/caddy/Caddyfile` |
+| `--dir PATH` | `/opt/wgkeeper-console` | Install directory |
+| `-h`, `--help` | | Print the options and exit |
+
+### What the script does
+
+1. Checks for Linux, root and `curl`. Installs Docker with `get.docker.com` if it's missing, and stops if Docker Compose v2 is missing.
+2. Downloads `docker-compose.yml` of the release and pins the image to `ghcr.io/wgkeeper/console:X.Y.Z`.
+3. If `console.env` doesn't exist, writes it, readable by root only, with a random `SECRET_KEY`, a random `BOOTSTRAP_ADMIN_PASSWORD` and `COOKIE_SECURE=false`. An existing `console.env` is kept.
+4. With `--domain`, or when Caddy is already installed, adds the Caddy layer, which sets `COOKIE_SECURE=true` and `TRUSTED_PROXIES`. If ufw is active, opens `80/tcp` and `443/tcp`.
+5. Writes `COMPOSE_FILE` to `.env`, pulls the image and runs `docker compose up -d --remove-orphans`.
+6. Waits up to about 60 seconds for `http://127.0.0.1:8000/readyz` and prints the result.
+
+### What it prints
+
+```text
+wgkeeper console 2.0.0 is running in /opt/wgkeeper-console.
+
+  Address:  https://console.example.com
+  Login:    admin / <24 hex characters>  (you'll be asked to change it)
+
+Settings and the secret key are in /opt/wgkeeper-console/console.env; back it up with the database.
+Manage it with: cd /opt/wgkeeper-console && docker compose ps | logs | down
+```
+
+Without `--domain`, **Address** is `http://127.0.0.1:8000`. If `console.env` already existed, **Login** says `unchanged`. Then [sign in](/docs/console/using-the-console#sign-in).
+
+If the console doesn't become ready, the script stops with an error. Read the logs:
+
+```bash
+cd /opt/wgkeeper-console && docker compose logs console
+```
+
+### Where the files are
+
+| Path in `/opt/wgkeeper-console` | Contents | Replaced on update |
+| --- | --- | --- |
+| `console.env` | Settings, `SECRET_KEY`, bootstrap admin password | Never |
+| `console_data` volume | SQLite database: users, nodes, encrypted node API keys | Never |
+| `docker-compose.yml` | Compose file of the installed release | Yes |
+| `examples/caddy/compose.yml` | Caddy service, with `--domain` | Yes |
+| `examples/caddy/Caddyfile` | Caddy site with your domain, with `--domain` | Never, once it exists |
+| `caddy_data`, `caddy_config` volumes | Caddy certificates and state, with `--domain` | Never |
+| `docker-compose.override.yml` | Your own Compose changes, if you create it | Never |
+| `.env` | `COMPOSE_FILE`, so plain `docker compose` here includes Caddy and your override file; your own variables | Only the `COMPOSE_FILE` line |
+
+### Allow only your addresses
+
+With a fixed office or VPN address, uncomment these lines in `examples/caddy/Caddyfile` and set your address:
 
 ```caddyfile
-console.example.com {
-  reverse_proxy wgkeeper-console:8000
-}
+# @blocked not remote_ip 203.0.113.7
+# abort @blocked
 ```
 
-Start the console:
+Then reload Caddy:
 
 ```bash
-docker compose up -d
+cd /opt/wgkeeper-console && docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
-Open `https://console.example.com`.
+## Update the console
 
-Default bootstrap login:
+Run the script again. It installs the latest stable release, or the one you pass with `--version`:
 
-- username: `admin`
-- password: value of `BOOTSTRAP_ADMIN_PASSWORD`
+```bash
+curl -fsSL https://raw.githubusercontent.com/wgkeeper/wgkeeper-console/main/scripts/install.sh | sudo bash -s -- --version 2.0.1
+```
 
-The first login requires a password change.
+It keeps `console.env`, the database, the Caddyfile and your override file, and replaces the Compose files. The console runs database migrations on start. An installed Caddy layer stays without `--domain`.
 
-## Basic Docker Compose
+Coming from 1.x, see [Upgrading to 2.0](/docs/upgrading#upgrade-the-console).
 
-Use this for a local setup or for testing over plain HTTP.
+## Install with Docker Compose
 
-Create `docker-compose.yaml`:
+Use this on hosts the script doesn't support, or to manage the files yourself. [`docker-compose.yml`](https://github.com/wgkeeper/wgkeeper-console/blob/main/docker-compose.yml) reads settings from `console.env`, keeps the database in the `console_data` volume and publishes the port on `127.0.0.1:8000` only. It also sets `no-new-privileges`, checks `/readyz` and rotates container logs (three files of 10 MB).
+
+1. Get the files and create `console.env`:
+
+   ```bash
+   git clone https://github.com/wgkeeper/wgkeeper-console.git
+   cd wgkeeper-console
+   cp console.env.example console.env
+   chmod 600 console.env
+   ```
+
+2. Set the required variables in `console.env`. Generate `SECRET_KEY` with `openssl rand -hex 32`:
+
+   ```ini
+   SECRET_KEY=<64 hex characters>
+   BOOTSTRAP_ADMIN_PASSWORD=<initial admin password>
+   COOKIE_SECURE=false
+   ```
+
+   Keep `COOKIE_SECURE=false` while you use plain HTTP (the loopback port or an SSH tunnel). All variables are in [Configuration](/docs/console/configuration).
+
+3. Start it:
+
+   ```bash
+   docker compose up -d
+   ```
+
+Back up `SECRET_KEY` with the database; see [Database and backups](/docs/console/database-and-backups).
+
+### Image tags
+
+The Compose file uses the image without a tag, which means `latest`. Pin a release in `docker-compose.override.yml`:
 
 ```yaml
 services:
-  wgkeeper-console:
-    image: ghcr.io/wgkeeper/console
-    container_name: wgkeeper-console
-    ports:
-      - "8000:8000"
-    environment:
-      PORT: 8000
-      DATABASE_URL: file:/app/data/wgkeeper-console.db
-      SECRET_KEY: paste-generated-64-char-hex-key-here
-      BOOTSTRAP_ADMIN_PASSWORD: change-me-now
-      COOKIE_SECURE: "false"
-    volumes:
-      - wgkeeper-console-data:/app/data
-    restart: unless-stopped
-
-volumes:
-  wgkeeper-console-data:
+  console:
+    image: ghcr.io/wgkeeper/console:2.0.0
 ```
 
-Start the console:
+| Tag | Points to |
+| --- | --- |
+| `X.Y.Z` | That release |
+| `latest` | The newest stable release |
+| `edge` | The latest build from `main` |
+| `sha-<commit>` | A build of that `main` commit |
+
+### HTTPS
+
+The console speaks plain HTTP. For access from other machines, see [Reverse proxy](/docs/guides/reverse-proxy).
+
+## From source
+
+For the toolchain, see [Deployment](https://github.com/wgkeeper/wgkeeper-console/blob/main/docs/deployment.md#from-source) in the console repository. To build the image yourself:
 
 ```bash
-docker compose up -d
+docker build -t ghcr.io/wgkeeper/console:local .
 ```
 
-Open `http://localhost:8000`.
+Then set `image: ghcr.io/wgkeeper/console:local` in `docker-compose.override.yml`.
 
-Use `COOKIE_SECURE=false` only when serving over plain HTTP. For HTTPS deployments, set `COOKIE_SECURE=true`.
+## Next steps
 
-## Configuration
-
-Most deployments only need these variables:
-
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `SECRET_KEY` | none | Required secret for sessions and stored API keys |
-| `BOOTSTRAP_ADMIN_PASSWORD` | none | Initial admin password on first start |
-| `DATABASE_URL` | `file:/app/data/wgkeeper-console.db` | SQLite file or PostgreSQL connection URL |
-| `PORT` | `8000` | App port |
-| `COOKIE_SECURE` | `true` in production | Set to `false` only when serving over plain HTTP |
-
-Optional variables:
-
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `BOOTSTRAP_ADMIN_USERNAME` | `admin` | Initial admin username |
-| `TRUSTED_PROXIES` | none | Comma-separated list of CIDRs/IPs whose `X-Forwarded-For` is trusted. Set this when running behind a reverse proxy so per-IP rate limits apply to the real client IP. |
-| `DOCS` | `false` | Enables Swagger UI at `/docs/index.html` |
-| `DEBUG` | `false` | Enables debug logging |
-
-PostgreSQL is supported with `DATABASE_URL`:
-
-```env
-DATABASE_URL=postgres://user:password@postgres:5432/wgkeeper_console
-```
-
-## Next step
-
-After logging in, add your wgkeeper nodes in the console. Each node needs its API endpoint and API key from the node configuration.
+- [Using the console](/docs/console/using-the-console): sign in, add your nodes, find your way around.
+- [Configuration](/docs/console/configuration): every environment variable.
+- [Database and backups](/docs/console/database-and-backups): PostgreSQL, backup and restore.
+- [Security](/docs/console/security): running the console safely.

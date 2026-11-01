@@ -1,126 +1,103 @@
 ---
-sidebar_position: 2
 title: Quick start
+description: Install wgkeeper console and your first wgkeeper node with the install scripts, then connect a device.
 ---
 
 # Quick start
 
-A minimal path to a working wgkeeper setup: one Console, one Node, and a working VPN client.
-
-This page intentionally takes shortcuts (plain HTTP, default ports, single host). For production-grade installs follow the linked pages.
+This tutorial takes you from two empty Linux servers to a connected WireGuard device, using the install scripts with their defaults.
 
 ## Before you start
 
-- Docker and Docker Compose installed on the machine that will run the Node (and on the Console host, if separate).
-- The Node host has a public IPv4 and an open UDP port for WireGuard® (default `51820/udp`).
+| Server | Needs |
+| --- | --- |
+| Panel | Linux, root access, a DNS name such as `console.example.com`, ports `80/tcp` and `443/tcp` open |
+| WireGuard server | Linux with WireGuard in the kernel (built in since 5.6), root access, a public IP, a DNS name such as `node1.example.com`, ports `51820/udp`, `80/tcp` and `443/tcp` open |
 
-## 1. Run the Console
+The scripts install Docker if it is missing. If `ufw` is active, they open the ports themselves; open them in any cloud firewall yourself.
 
-Create `docker-compose.yaml`:
+## 1. Install the console
 
-```yaml
-services:
-  wgkeeper-console:
-    image: ghcr.io/wgkeeper/console
-    ports:
-      - "8000:8000"
-    environment:
-      PORT: 8000
-      DATABASE_URL: file:/app/data/wgkeeper-console.db
-      SECRET_KEY: REPLACE_WITH_OUTPUT_OF_openssl_rand_hex_32
-      BOOTSTRAP_ADMIN_PASSWORD: change-me-now
-      COOKIE_SECURE: "false"
-    volumes:
-      - wgkeeper-console-data:/app/data
-    restart: unless-stopped
-
-volumes:
-  wgkeeper-console-data:
-```
-
-Generate the secret and start:
+On the panel server, run:
 
 ```bash
-openssl rand -hex 32     # paste into SECRET_KEY
-docker compose up -d
+curl -fsSL https://raw.githubusercontent.com/wgkeeper/wgkeeper-console/main/scripts/install.sh | sudo bash -s -- --domain console.example.com
 ```
 
-Open `http://localhost:8000`, log in as `admin` with the bootstrap password, and set a new password when prompted.
+You should see the address and a random admin password:
 
-For HTTPS and a reverse proxy, see [Console Installation](./console/installation.md).
-
-## 2. Run a Node
-
-On the Node host, create `config.yaml`:
-
-```yaml
-server:
-  port: 51821
-auth:
-  api_key: "REPLACE_WITH_A_LONG_RANDOM_STRING"
-wireguard:
-  interface: "wg0"
-  subnet: "10.0.0.0/24"
-  server_ip: "10.0.0.1"
-  listen_port: 51820
-  routing:
-    wan_interface: "eth0"
+```text
+  Address:  https://console.example.com
+  Login:    admin / <24 hex characters>  (you'll be asked to change it)
 ```
 
-Use `ip route` to confirm `wan_interface` matches the host's outbound NIC.
+:::warning[Back up console.env]
 
-Create `docker-compose.yaml`:
+`/opt/wgkeeper-console/console.env` holds `SECRET_KEY`, which encrypts the stored node API keys. Back it up with the database. See [Database and backups](/docs/console/database-and-backups).
 
-```yaml
-services:
-  wireguard:
-    image: ghcr.io/wgkeeper/node
-    restart: always
-    cap_add: [NET_ADMIN, SYS_MODULE]
-    volumes:
-      - ./config.yaml:/app/config.yaml:ro
-      - ./wireguard:/etc/wireguard
-    ports:
-      - "51820:51820/udp"
-      - "51821:51821"
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-      - net.ipv4.ip_forward=1
-```
+:::
 
-Start:
+Without `--domain`, see [Console installation](/docs/console/installation) for access through an SSH tunnel.
+
+## 2. Sign in
+
+Open the address, sign in as `admin` with the printed password, and set a new password of at least 8 characters.
+
+You should see the **Nodes** page with no nodes.
+
+## 3. Install the node
+
+On the WireGuard server, run:
 
 ```bash
-docker compose up -d
+curl -fsSL https://raw.githubusercontent.com/wgkeeper/wgkeeper-node/main/scripts/install.sh | sudo bash -s -- --domain node1.example.com
 ```
 
-For TLS, allowlists, peer persistence, and IPv6 see [Node Installation](./node/installation.md) and [Node Configuration](./node/configuration.md).
+You should see the API address and a new API key:
 
-## 3. Connect the Node to the Console
+```text
+  API address:  https://node1.example.com
+  API key:      <64 hex characters>
+  WireGuard:    51820/udp
+```
 
-In the Console, open **Nodes → Add node** and provide:
+The `--domain` option puts Caddy with HTTPS in front of the API. Without it, the API listens on `127.0.0.1` only and the console cannot reach it. Other options: [Node installation](/docs/node/installation).
 
-- **API endpoint** — `http://<node-host>:51821`
-- **API key** — the value of `auth.api_key` from the Node `config.yaml`
-- **Name** — anything that identifies the server clearly
+## 4. Add the node to the console
 
-The node should appear with status **online** within a few seconds. If it doesn't, check the API endpoint is reachable from the Console host and the API key matches.
+In the console, click **Add node**. Paste the API address into **Node address** and the key into **API key**, then click **Add node**.
 
-## 4. Create a peer
+The console tests the connection first. You should see the node in the list as **Online** with its version. If the dialog shows an error, see [Troubleshooting](/docs/guides/troubleshooting).
 
-In the Console, open the node and click **Create peer**. The Console allocates an IP, generates keys, and exposes a downloadable client config.
+## 5. Generate a client config
 
-See [Managing peers and configs](./console/managing-peers-and-configs.md) for fields, expiry, and re-issue flow.
+1. Open the node and click **New config**.
+2. Keep the generated **Peer ID**. **Expires**, **Address families** and **DNS servers** are optional.
+3. Click **Generate config**, then **Download**.
 
-## 5. Connect a client
+You should get a file named like `wgkeeper-1b5a0c1c.conf`.
 
-Import the downloaded `.conf` into a WireGuard client (mobile app, `wg-quick up <file>` on Linux/macOS, etc.).
+:::danger[The private key is shown once]
 
-Once connected, the peer's handshake counter in the Console starts updating.
+Neither the console nor the node keeps the peer's private key. Download or copy the config before you leave the page.
 
-## What to do next
+:::
 
-- **Production hardening:** [Console Installation](./console/installation.md) (Caddy + HTTPS), [Node Installation](./node/installation.md) (Caddy variant).
-- **Persistence:** set `wireguard.peer_store_file` so peers survive restarts — see [Node Configuration](./node/configuration.md#peer-persistence).
-- **Access control:** `server.allowed_ips` on the Node — see [Node Configuration](./node/configuration.md#access-control).
-- **Monitoring:** optional Prometheus/Grafana — see [Metrics](./node/metrics.md).
+## 6. Connect a device
+
+Import the `.conf` file into the WireGuard app and turn the tunnel on. On Linux with `wg-quick`:
+
+```bash
+sudo install -m 600 wgkeeper-1b5a0c1c.conf /etc/wireguard/wgk0.conf
+sudo wg-quick up wgk0
+```
+
+In the console, open the node's **Peers** tab. You should see the peer as **Active** with a recent **Last handshake**. If it stays at **Never**, see [Troubleshooting](/docs/guides/troubleshooting).
+
+## Next steps
+
+- Add more servers: repeat steps 3 and 4 on each one.
+- [Peers and configs](/docs/console/managing-peers-and-configs): expiry, key rotation, deleting peers.
+- [Node configuration](/docs/node/configuration): IPv6, the WAN interface, access to private networks.
+- [Console security](/docs/console/security) and [node security](/docs/node/security): what to lock down.
+- Updates: run the same install command again on each server.

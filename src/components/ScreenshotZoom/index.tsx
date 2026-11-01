@@ -1,16 +1,19 @@
 import {useEffect, useId, useState} from 'react';
 import {createPortal} from 'react-dom';
+import ThemedImage from '@theme/ThemedImage';
 
 import styles from './styles.module.css';
 
 type ScreenshotZoomProps = {
   src: string;
   alt: string;
-  /** Optional dark-theme variant; shown via CSS when [data-theme='dark']. */
+  /** Optional dark-theme variant. After hydration only the active theme's image is rendered. */
   srcDark?: string;
+  /** Load right away; for an image in the first screen. */
+  eager?: boolean;
 };
 
-export default function ScreenshotZoom({src, alt, srcDark}: ScreenshotZoomProps) {
+export default function ScreenshotZoom({src, alt, srcDark, eager = false}: ScreenshotZoomProps) {
   const [isOpen, setIsOpen] = useState(false);
   const titleId = useId();
 
@@ -49,14 +52,12 @@ export default function ScreenshotZoom({src, alt, srcDark}: ScreenshotZoomProps)
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label={`Open larger screenshot: ${alt}`}>
-        {srcDark ? (
-          <>
-            <img className={styles.themeLight} src={src} alt="" />
-            <img className={styles.themeDark} src={srcDark} alt="" />
-          </>
-        ) : (
-          <img src={src} alt={alt} />
-        )}
+        <ThemedImage
+          sources={{light: src, dark: srcDark ?? src}}
+          alt=""
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+        />
       </button>
       {isOpen &&
         typeof document !== 'undefined' &&
@@ -79,14 +80,7 @@ export default function ScreenshotZoom({src, alt, srcDark}: ScreenshotZoomProps)
                   Close
                 </button>
               </div>
-              {srcDark ? (
-                <>
-                  <img className={`${styles.fullImage} ${styles.themeLight}`} src={src} alt="" />
-                  <img className={`${styles.fullImage} ${styles.themeDark}`} src={srcDark} alt="" />
-                </>
-              ) : (
-                <img className={styles.fullImage} src={src} alt="" />
-              )}
+              <ThemedImage className={styles.fullImage} sources={{light: src, dark: srcDark ?? src}} alt="" />
             </div>
           </div>,
           document.body,

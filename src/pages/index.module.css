@@ -1,543 +1,390 @@
-/* ============================================================================
- * Homepage — wgkeeper
- * Tokens come from src/css/custom.css (--wg-*). Light + dark via those tokens.
- * ========================================================================= */
+/*
+ * Homepage. Tokens come from src/css/custom.css (--wg-*).
+ * One left edge for everything; one accent (the wordmark red) for the primary action; panels 10px,
+ * controls 6px; sections divided by hairlines; no shadows; size carries hierarchy, weight stays 500.
+ */
 
-/* ----------------------------------------------------------------------------
- * Hero
- * ------------------------------------------------------------------------- */
+.hero,
+.section {
+  --display-1: clamp(40px, 5.6vw, 72px);
+  --display-2: clamp(28px, 3.4vw, 40px);
+}
+
+.hero :global(.container),
+.section :global(.container) {
+  max-width: calc(1120px + 4rem);
+  padding-inline: 2rem;
+}
+
+@media (max-width: 767px) {
+  .hero :global(.container),
+  .section :global(.container) {
+    padding-inline: 1rem;
+  }
+}
+
+/* ---------- hero ---------- */
+
 .hero {
-  --hero-dot: var(--wg-border);
-  --hero-glow: oklch(0.55 0.19 258 / 0.1);
-  position: relative;
-  isolation: isolate;
+  padding-block: 96px;
   overflow: hidden;
-  padding: clamp(3rem, 2rem + 6vw, 5.5rem) 0 clamp(2.75rem, 2rem + 4vw, 4rem);
-  background: var(--wg-bg);
-  border-bottom: 1px solid var(--wg-border);
-  text-align: left;
-}
-
-[data-theme='dark'] .hero {
-  --hero-glow: oklch(0.72 0.15 256 / 0.13);
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: radial-gradient(58% 50% at 82% 6%, var(--hero-glow), transparent 72%);
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(var(--hero-dot) 1px, transparent 1.4px);
-  background-size: 26px 26px;
-  opacity: 0.55;
-  -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 35%, transparent 80%);
-  mask-image: radial-gradient(120% 90% at 50% 0%, #000 35%, transparent 80%);
-}
-
-.heroGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  gap: clamp(2rem, 1rem + 4vw, 3.5rem);
-  align-items: center;
-}
-
-.heroCopy {
-  max-width: 38rem;
-}
-
-.meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 1.1rem;
-  font-family: var(--wg-font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.01em;
-  color: var(--wg-muted);
-}
-
-.statusDot {
-  flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--wg-online);
-  box-shadow: 0 0 0 3px oklch(0.56 0.14 152 / 0.18);
-  animation: wgPulse 2.6s ease-in-out infinite;
-}
-
-@keyframes wgPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 2px oklch(0.56 0.14 152 / 0.22);
-  }
-  50% {
-    box-shadow: 0 0 0 5px oklch(0.56 0.14 152 / 0);
-  }
 }
 
 .heroTitle {
-  margin: 0 0 1.1rem;
-  font-size: clamp(2.1rem, 1.3rem + 2.9vw, 3.3rem);
-  line-height: 1.04;
-  letter-spacing: -0.028em;
-  color: var(--wg-heading);
-  font-weight: 700;
-}
-
-.heroText {
-  max-width: 34rem;
   margin: 0;
-  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1rem);
-  line-height: 1.6;
-  color: var(--wg-muted);
+  max-width: 12em;
+  font-size: var(--display-1);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  font-weight: 500;
+  text-wrap: balance;
 }
 
-.heroText code {
-  font-size: 0.85em;
+.heroSub {
+  max-width: 50ch;
+  margin: 24px 0 0;
+  color: var(--wg-fg-muted);
+  font-size: 18px;
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1.75rem;
+  align-items: center;
+  gap: 10px;
+  margin-top: 32px;
 }
 
-.primaryButton {
-  font-weight: 600;
-}
-
-.ghostButton {
+.actions :global(.button) {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--wg-border-strong);
-  background: var(--wg-surface);
-  color: var(--wg-heading);
-  box-shadow: none;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  height: 40px;
+  padding-inline: 18px;
+  font-size: 14px;
 }
 
-.ghostButton:hover {
-  color: var(--wg-heading);
-  background: var(--wg-surface-2);
-  border-color: var(--wg-faint);
+.release {
+  margin-left: 14px;
+  color: var(--wg-fg-muted);
+  font-size: 14px;
+  border-bottom: 1px solid var(--wg-border-strong);
+  transition: color 0.2s var(--wg-ease), border-color 0.2s var(--wg-ease);
 }
 
-.ghIcon {
-  display: inline-flex;
+.release:hover {
+  color: var(--wg-fg);
+  border-color: var(--wg-fg);
+  text-decoration: none;
 }
 
-.specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.1rem;
-  margin: 1.6rem 0 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--wg-font-mono);
-  font-size: 0.78rem;
-  color: var(--wg-faint);
+.heroShot {
+  margin-top: 64px;
 }
 
-.specs li {
-  position: relative;
+/* ---------- shared ---------- */
+
+.section {
+  padding-block: 96px;
+  border-top: 1px solid var(--wg-border);
 }
 
-.specs li:not(:first-child)::before {
-  content: '';
-  position: absolute;
-  left: -0.6rem;
-  top: 50%;
-  width: 3px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--wg-border-strong);
-  transform: translateY(-50%);
+@media (max-width: 767px) {
+  .hero {
+    padding-block: 56px 72px;
+  }
+
+  .heroShot {
+    margin-top: 48px;
+  }
+
+  .section {
+    padding-block: 72px;
+  }
+
+  .release {
+    margin-left: 4px;
+  }
 }
 
-/* Hero media: framed product window */
-.heroMedia {
-  min-width: 0;
+.h2 {
+  margin: 0 0 40px;
+  max-width: 16em;
+  font-size: var(--display-2);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  text-wrap: balance;
 }
 
-.frame {
-  position: relative;
-  border: 1px solid var(--wg-border-strong);
-  border-radius: var(--wg-radius-lg);
-  background: var(--wg-surface);
-  overflow: hidden;
-  box-shadow: var(--wg-shadow-lg);
-}
-
-.frameBar {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.55rem 0.8rem;
-  border-bottom: 1px solid var(--wg-border);
-  background: var(--wg-surface-2);
-}
-
-.frameDots {
-  display: inline-flex;
-  gap: 0.4rem;
-}
-
-.frameDots i {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  background: var(--wg-border-strong);
-}
-
-.framePath {
-  font-family: var(--wg-font-mono);
-  font-size: 0.76rem;
-  color: var(--wg-faint);
-}
-
-/* ----------------------------------------------------------------------------
- * Shared section primitives
- * ------------------------------------------------------------------------- */
-.section,
-.archSection,
-.stepsSection {
-  padding: clamp(3rem, 2rem + 5vw, 4.75rem) 0;
-}
-
-.sectionTitle {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2rem);
-  line-height: 1.1;
-  letter-spacing: -0.022em;
-  color: var(--wg-heading);
-}
-
-.sectionText {
-  max-width: 46ch;
+.lede {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.62;
-  color: var(--wg-muted);
+  max-width: 40ch;
+  color: var(--wg-fg-muted);
+  font-size: 18px;
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
 .textLink {
   display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-weight: 600;
-  font-size: 0.92rem;
-  color: var(--wg-accent-strong);
-}
-
-.textLink::after {
-  content: '→';
-  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  margin-top: 24px;
+  color: var(--wg-fg);
+  font-size: 15px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--wg-border-strong);
+  transition: border-color 0.2s var(--wg-ease);
 }
 
 .textLink:hover {
-  color: var(--wg-accent-hover);
+  border-color: var(--wg-fg);
+  text-decoration: none;
 }
 
-.textLink:hover::after {
-  transform: translateX(3px);
-}
-
-/* ----------------------------------------------------------------------------
- * Capability matrix (hairline grid, not floating cards)
- * ------------------------------------------------------------------------- */
-.matrix {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border: 1px solid var(--wg-border);
-  border-radius: var(--wg-radius-lg);
-  background: var(--wg-surface);
-  overflow: hidden;
-}
-
-.cell {
-  padding: clamp(1.25rem, 1rem + 1.2vw, 1.85rem);
-  border-right: 1px solid var(--wg-border);
-  border-bottom: 1px solid var(--wg-border);
-  transition: background-color 160ms ease;
-}
-
-.cell:nth-child(2n) {
-  border-right: none;
-}
-
-.cell:nth-last-child(-n + 2) {
-  border-bottom: none;
-}
-
-.cell:hover {
-  background: var(--wg-surface-2);
-}
-
-.cellKey {
-  display: block;
-  margin-bottom: 0.95rem;
-  font-family: var(--wg-font-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.04em;
-  color: var(--wg-accent-strong);
-}
-
-.cellTitle {
-  margin: 0 0 0.4rem;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  color: var(--wg-heading);
-}
-
-.cellText {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--wg-muted);
-}
-
-/* ----------------------------------------------------------------------------
- * Architecture / topology
- * ------------------------------------------------------------------------- */
-.archSection {
-  background: var(--wg-surface-2);
-  border-top: 1px solid var(--wg-border);
-  border-bottom: 1px solid var(--wg-border);
-}
-
-.archGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  gap: clamp(2rem, 1rem + 4vw, 3.5rem);
-  align-items: center;
-}
-
-.archCopy .sectionTitle {
-  margin-bottom: 1rem;
-}
-
-.archCopy .textLink {
-  margin-top: 1.25rem;
-}
-
-.topo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin: 0;
-  padding: clamp(1.5rem, 1rem + 2.5vw, 2.5rem);
-  border: 1px solid var(--wg-border);
-  border-radius: var(--wg-radius-lg);
-  background: var(--wg-surface);
-}
-
-.wire {
-  width: 1px;
-  height: clamp(18px, 3vw, 30px);
-  background: var(--wg-border-strong);
-}
-
-.topoNode {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  min-width: 6.5rem;
-  padding: 0.6rem 1rem;
+.shot {
   border: 1px solid var(--wg-border);
   border-radius: var(--wg-radius);
-  background: var(--wg-surface-2);
-  text-align: center;
+  overflow: hidden;
+  background: var(--wg-surface);
 }
 
-.topoOperator {
-  background: var(--wg-surface-3);
-}
-
-.topoConsole {
-  border-color: var(--wg-accent-line);
-  background: var(--wg-accent-soft);
-}
-
-[data-theme='dark'] .topoConsole {
-  background: oklch(0.275 0.05 258);
-}
-
-.topoLabel {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--wg-heading);
-}
-
-.topoSub {
-  font-family: var(--wg-font-mono);
-  font-size: 0.72rem;
-  color: var(--wg-faint);
-}
-
-.topoLeafHead {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--wg-heading);
-}
-
-.topoNodes {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(0.5rem, 1.5vw, 1rem);
+.shot :global(button) {
+  display: block;
   width: 100%;
-  padding-top: clamp(18px, 3vw, 30px);
+  border: 0;
+  padding: 0;
+  border-radius: 0;
 }
 
-.topoNodes::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 16.66%;
-  right: 16.66%;
-  height: 1px;
-  background: var(--wg-border-strong);
+/* Two columns: copy and an artifact. */
+.split {
+  display: grid;
+  gap: 48px;
 }
 
-.topoLeaf {
-  position: relative;
+@media (min-width: 960px) {
+  .split {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 72px;
+    align-items: center;
+  }
+
+  .splitTop {
+    align-items: start;
+  }
+}
+
+.split .h2 {
+  margin-bottom: 20px;
+}
+
+/* ---------- showcase ---------- */
+
+/* Columns follow the crops' widths (1665 and 1095 px) so both shots end at the same height. */
+.pair {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 900px) {
+  .pair {
+    grid-template-columns: minmax(0, 1665fr) minmax(0, 1095fr);
+  }
+}
+
+.pairItem {
+  margin: 0;
   min-width: 0;
 }
 
-.topoLeaf::before {
-  content: '';
-  position: absolute;
-  top: calc(-1 * clamp(18px, 3vw, 30px));
-  left: 50%;
-  width: 1px;
-  height: clamp(18px, 3vw, 30px);
-  background: var(--wg-border-strong);
+.pairItem figcaption {
+  margin-top: 14px;
+  color: var(--wg-fg-muted);
+  font-size: 15px;
 }
 
-/* ----------------------------------------------------------------------------
- * Deployment steps (connected stepper)
- * ------------------------------------------------------------------------- */
-.stepsHeader {
-  max-width: 42rem;
-  margin: 0 0 clamp(1.75rem, 1rem + 2.5vw, 2.5rem);
-}
+/* ---------- architecture ---------- */
 
-.stepsHeader .sectionTitle {
-  margin-bottom: 0.75rem;
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(1rem, 0.5rem + 2vw, 2rem);
+.diagram {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  padding: 32px;
+  border: 1px solid var(--wg-border);
+  border-radius: var(--wg-radius);
+  background: var(--wg-surface);
+  text-align: center;
 }
 
-.step {
+.dBox {
   display: flex;
   flex-direction: column;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--wg-border-strong);
+  align-items: center;
+  gap: 2px;
+  padding: 14px 10px;
+  border: 1px solid var(--wg-border-strong);
+  border-radius: var(--wg-radius-control);
+  background: var(--wg-code-bg);
+  min-width: 0;
 }
 
-.stepNum {
-  display: block;
-  margin-bottom: 0.9rem;
-  font-family: var(--wg-font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--wg-accent-strong);
+.dPanel {
+  max-width: 240px;
+  margin-inline: auto;
+  border-color: color-mix(in srgb, var(--wg-accent) 45%, var(--wg-border-strong));
 }
 
-.stepTitle {
-  margin: 0 0 0.4rem;
-  font-size: 1.05rem;
+.dTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--wg-fg);
+}
+
+.dSub {
+  font-size: 12px;
+  color: var(--wg-fg-subtle);
+}
+
+.dDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--wg-success);
+}
+
+/* A trunk from the console that branches to the three servers. */
+.dFan {
+  position: relative;
+  height: 44px;
+  margin-inline: calc((100% - 24px) / 6);
+}
+
+.dFan::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 22px;
+  border-left: 1px solid var(--wg-border-strong);
+}
+
+.dFan::after {
+  content: '';
+  position: absolute;
+  inset: 22px 0 0;
+  border: 1px solid var(--wg-border-strong);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+}
+
+.dNodes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dClients {
+  margin: 20px 0 0;
+  color: var(--wg-fg-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .diagram {
+    padding: 20px 14px;
+  }
+
+  .dNodes {
+    gap: 8px;
+  }
+
+  .dNodes .dTitle {
+    font-size: 13px;
+    gap: 5px;
+  }
+
+  .dNodes .dSub {
+    display: none;
+  }
+}
+
+/* ---------- safeguards ---------- */
+
+.list {
+  margin: 0;
+}
+
+.listItem {
+  padding-block: 20px;
+  border-top: 1px solid var(--wg-border);
+}
+
+.listItem:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.listItem:last-child {
+  padding-bottom: 0;
+}
+
+.listItem dt {
+  font-size: 17px;
+  font-weight: 500;
   letter-spacing: -0.01em;
-  color: var(--wg-heading);
+  color: var(--wg-fg);
 }
 
-.stepText {
-  margin: 0 0 1.1rem;
-  font-size: 0.92rem;
+.listItem dd {
+  margin: 6px 0 0;
+  max-width: 52ch;
+  color: var(--wg-fg-muted);
+  font-size: 16px;
   line-height: 1.55;
-  color: var(--wg-muted);
 }
 
-.step .textLink {
-  margin-top: auto;
+/* ---------- start ---------- */
+
+.guides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--wg-border);
+  border-radius: var(--wg-radius);
+  overflow: hidden;
+  background: var(--wg-border);
 }
 
-/* ----------------------------------------------------------------------------
- * Responsive
- * ------------------------------------------------------------------------- */
-@media screen and (max-width: 996px) {
-  .heroGrid {
+@media (max-width: 520px) {
+  .guides {
     grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .heroCopy {
-    max-width: none;
-  }
-
-  .archGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .steps {
-    grid-template-columns: 1fr;
-  }
-
-  .step {
-    border-top: none;
-    padding-top: 0;
-    padding-left: 1.1rem;
-    border-left: 1px solid var(--wg-border-strong);
   }
 }
 
-@media screen and (max-width: 600px) {
-  .matrix {
-    grid-template-columns: 1fr;
-  }
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 24px 24px;
+  background: var(--wg-surface);
+  transition: background-color 0.2s var(--wg-ease);
+}
 
-  .cell {
-    border-right: none;
-  }
+.guide:hover {
+  background: var(--wg-muted);
+  text-decoration: none;
+}
 
-  .cell:nth-last-child(-n + 2) {
-    border-bottom: 1px solid var(--wg-border);
-  }
+.guideTitle {
+  color: var(--wg-fg);
+  font-size: 16px;
+  font-weight: 500;
+}
 
-  .cell:last-child {
-    border-bottom: none;
-  }
-
-  .topoNode {
-    min-width: 0;
-    padding: 0.5rem 0.4rem;
-  }
-
-  .topoSub {
-    font-size: 0.66rem;
-  }
+.guideText {
+  color: var(--wg-fg-muted);
+  font-size: 15px;
+  line-height: 1.5;
 }
