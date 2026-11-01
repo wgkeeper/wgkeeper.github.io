@@ -11,13 +11,13 @@ Use this page after the Console and at least one Node are already running.
 
 <ScreenshotZoom
   src="/img/screenshots/wgkeeper-nodes-light.png"
-  alt="WGKeeper Console showing nodes, status, versions, and updates"
+  alt="wgkeeper console showing nodes, status, versions, and updates"
 />
 
 ## Typical workflow
 
-1. Install and start WGKeeper Console.
-2. Install and start a WGKeeper Node.
+1. Install and start wgkeeper console.
+2. Install and start a wgkeeper node.
 3. Add the Node to the Console.
 4. Check that the Node is healthy.
 5. Create peers and generate client configs.
@@ -48,7 +48,7 @@ Open a node before creating peers or changing client configs.
 
 <ScreenshotZoom
   src="/img/screenshots/wgkeeper-node-overview-light.png"
-  alt="WGKeeper node overview with health and capacity metrics"
+  alt="wgkeeper node overview with health and capacity metrics"
 />
 
 Use the overview to confirm the WireGuard interface, address allocation, current peer counts, and remaining capacity.

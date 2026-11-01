@@ -109,7 +109,7 @@ function HomepageHeader() {
             <ScreenshotZoom
               src={`${screenshotPath}wgkeeper-nodes-light.png`}
               srcDark={`${screenshotPath}wgkeeper-nodes-dark.png`}
-              alt="WGKeeper Console showing nodes, status, versions, and updates"
+              alt="wgkeeper console showing nodes, status, versions, and updates"
             />
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={siteConfig.title}
-      description="WGKeeper documentation for the Console and Node components.">
+      description="wgkeeper documentation for the Console and Node components.">
       <HomepageHeader />
       <main>
         <Capabilities />

@@ -5,7 +5,7 @@ title: Quick start
 
 # Quick start
 
-A minimal path to a working WGKeeper setup: one Console, one Node, and a working VPN client.
+A minimal path to a working wgkeeper setup: one Console, one Node, and a working VPN client.
 
 This page intentionally takes shortcuts (plain HTTP, default ports, single host). For production-grade installs follow the linked pages.
 

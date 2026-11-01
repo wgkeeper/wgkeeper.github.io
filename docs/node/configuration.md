@@ -5,7 +5,7 @@ title: Node Configuration
 
 # Node Configuration
 
-WGKeeper Node reads configuration from `config.yaml`.
+wgkeeper node reads configuration from `config.yaml`.
 
 Use this page to understand what to adjust.
 

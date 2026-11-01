@@ -11,7 +11,7 @@ Use this page when a node is already connected and you want to create client acc
 
 <ScreenshotZoom
   src="/img/screenshots/wgkeeper-node-peers-light.png"
-  alt="WGKeeper peer management screen"
+  alt="wgkeeper peer management screen"
 />
 
 ## Peer workflow
@@ -33,7 +33,7 @@ When removing a peer, make sure the client no longer needs access. Removing the 
 
 <ScreenshotZoom
   src="/img/screenshots/wgkeeper-peer-details-light.png"
-  alt="WGKeeper peer details drawer"
+  alt="wgkeeper peer details drawer"
 />
 
 The details view helps you verify whether a client is actually being used:
@@ -49,7 +49,7 @@ If the latest handshake is empty or old, check the client config, public endpoin
 
 <ScreenshotZoom
   src="/img/screenshots/wgkeeper-config-generator-light.png"
-  alt="WGKeeper WireGuard config generator"
+  alt="wgkeeper WireGuard config generator"
 />
 
 Generate a client config after the peer exists on the node.

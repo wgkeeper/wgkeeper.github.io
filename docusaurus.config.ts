@@ -3,7 +3,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'WGKeeper Docs',
+  title: 'wgkeeper docs',
   tagline: 'Open-source WireGuard® server management system',
   future: {
     v4: true,
@@ -61,7 +61,7 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'WGKeeper Docs',
+      title: 'wgkeeper docs',
       items: [
         {
           to: '/docs',
@@ -77,7 +77,7 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
-      copyright: `Copyright © ${new Date().getFullYear()} WGKeeper. WireGuard® is a registered trademark of Jason A. Donenfeld.`,
+      copyright: `Copyright © ${new Date().getFullYear()} wgkeeper. WireGuard® is a registered trademark of Jason A. Donenfeld.`,
     },
     prism: {
       theme: prismThemes.oneLight,

@@ -5,7 +5,7 @@ title: Installation
 
 # Node Installation
 
-WGKeeper Node is installed with Docker Compose.
+wgkeeper node is installed with Docker Compose.
 
 There are two modes:
 

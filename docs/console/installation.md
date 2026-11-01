@@ -5,7 +5,7 @@ title: Installation
 
 # Console Installation
 
-WGKeeper Console is the central interface for managing WGKeeper Nodes and WireGuard® peers.
+wgkeeper console is the central interface for managing wgkeeper nodes and WireGuard® peers.
 
 Use it to connect nodes, inspect peer state, download generated configs, and manage console access.
 
@@ -26,7 +26,7 @@ openssl rand -hex 32
 
 ## Recommended: Docker Compose with Caddy
 
-Use this setup when exposing WGKeeper Console publicly. Caddy provides the public HTTP/HTTPS entrypoint and forwards traffic to the console container inside the Docker network.
+Use this setup when exposing wgkeeper console publicly. Caddy provides the public HTTP/HTTPS entrypoint and forwards traffic to the console container inside the Docker network.
 
 Create `docker-compose.yaml`:
 
@@ -159,4 +159,4 @@ DATABASE_URL=postgres://user:password@postgres:5432/wgkeeper_console
 
 ## Next step
 
-After logging in, add your WGKeeper Nodes in the console. Each node needs its API endpoint and API key from the node configuration.
+After logging in, add your wgkeeper nodes in the console. Each node needs its API endpoint and API key from the node configuration.

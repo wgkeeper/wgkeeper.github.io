@@ -5,7 +5,7 @@ title: Metrics
 
 # Metrics
 
-WGKeeper Node can expose a Prometheus `/metrics` endpoint.
+wgkeeper node can expose a Prometheus `/metrics` endpoint.
 
 It is **off by default**. Enable it when you want to monitor a node with Prometheus, Grafana, or any compatible TSDB. When enabled, it runs on its own HTTP listener with mandatory bearer auth, separate from the API key.
 
